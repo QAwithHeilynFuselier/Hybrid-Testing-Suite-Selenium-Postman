@@ -19,7 +19,6 @@ dependencies {
     testImplementation 'io.qameta.allure:allure-testng:2.24.0'
 }
 
-
 allure {
     version = '2.24.0'
     adapter {

@@ -49,11 +49,9 @@ public class BaseTest {
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
         options.addArguments("--start-maximized");
-
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-
 
         driver = new ChromeDriver(options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -64,7 +62,6 @@ public class BaseTest {
             driver.get(baseUrl);
         }
     }
-
     public void navigatetoPage() {
         driver.get(url);
     }
