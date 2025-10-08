@@ -24,6 +24,10 @@ public class   LoginPage extends BasePage {
     @FindBy(css = ".error")
     private WebElement errorMessageLabel;
 
+
+    @FindBy(css = "div.error")
+    private WebElement errorBanner;
+
     public LoginPage(WebDriver givenDriver) {
         super(givenDriver);
     }
@@ -45,7 +49,7 @@ public class   LoginPage extends BasePage {
     }
 
 
-    public String getErrorMessage() {
+    public String getErrorMessage2() {
         try {
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -60,6 +64,20 @@ public class   LoginPage extends BasePage {
 
     public String getHtml5ValidationMessage(WebElement element) {
         return element.getAttribute("validationMessage");
+    }
+
+
+
+    public String getErrorMessage() {
+        try {
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.visibilityOf(errorBanner));
+
+            return errorBanner.getText().trim();
+        } catch (TimeoutException e) {
+            return "ERROR: The error banner (.error) did not appear!";
+        }
     }
 
 
