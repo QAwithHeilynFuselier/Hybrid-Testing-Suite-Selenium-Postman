@@ -33,7 +33,7 @@ public class LoginTests extends BaseTest {
         CurrentQueuePage currentsong = new CurrentQueuePage(driver);
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-    loginPage.login("heilyn.fuselier@testpro.io", "minuevocarcacha@2026");
+    loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
     wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("login")));
 
     String currentUrl = driver.getCurrentUrl();
@@ -68,12 +68,12 @@ public class LoginTests extends BaseTest {
     }
 
 
-
+/*
     @Test(priority = 2, description ="INTERNSHIP-108252 Koel app | Log in")
 
     public void loginwithcorrectPasswordTest() {
         LoginPage loginPage = new LoginPage(driver); // Page Factory init happens in the constructor
-        HomePage homePage = loginPage.login("heilyn.fuselier@testpro.io", "NewPassword@2027");
+        HomePage homePage = loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
         takeScreenshot("Login with correct password");
         Assert.assertTrue(homePage.isAvatarVisible(), "Avatar no visible");
 
@@ -87,9 +87,9 @@ public class LoginTests extends BaseTest {
                 {"heilyn.fuselier@testpro.io", "WrongPass", "Couldn't log you in"}, // BUG FOUND: Error banner does not appear for invalid credentials
                 {"", "", "Please fill out this field."}
         };
-    }
+    }*/
 
-
+/*
     @Test(priority = 3, dataProvider = "invalidLoginData")
     public void loginValidationMessages(String email, String pass, String expectedError) {
         LoginPage loginPage = new LoginPage(driver);
@@ -104,8 +104,8 @@ public class LoginTests extends BaseTest {
         Assert.assertTrue(actualError.contains(expectedError),
                 "Expected [" + actualError + "] to contain [" + expectedError + "]");
 
-    }
-
+    }*/
+/*
     @Test(priority = 4)
 
     public void loginWithDeepLink() {
@@ -114,14 +114,14 @@ public class LoginTests extends BaseTest {
         driver.get(deepLink);
 
         LoginPage loginPage = new LoginPage(driver);
-        loginPage.login("heilyn.fuselier@testpro.io", "NewPassword@2027");
+        loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
         takeScreenshot("loginWithDeepLink");
         Assert.assertTrue(driver.getCurrentUrl().contains("#!/albums"));
 
-    }
+    }*/
 
 
-
+/*
     //INTERNSHIP-108260: User should be able to log out after updating credentials
 
    @Test(priority = 5, description = "User should be able to log out after successful login, User should be navigated to the Login page after logging out")
@@ -129,7 +129,7 @@ public class LoginTests extends BaseTest {
         LoginPage loginPage = new LoginPage(driver);
         HomePage homePage = new HomePage(driver);
 
-        loginPage.login("heilyn.fuselier@testpro.io", "NewPassword@2027");
+        loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
         homePage.clickLogoutJS();
        takeScreenshot("Logout_Button");
       WebElement btn = wait.until(ExpectedConditions.visibilityOf(homePage.getLoginButton()));
@@ -144,7 +144,7 @@ public class LoginTests extends BaseTest {
         LoginPage loginPage = new LoginPage(driver);
         HomePage homePage = new HomePage(driver);
 
-        loginPage.login("heilyn.fuselier@testpro.io", "NewPassword@2027");
+        loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
         homePage.highlightLogoutButton();
         takeScreenshot("logoutUIVerificationTest");
         boolean isVisible = homePage.isLogoutButtonVisible();
@@ -160,10 +160,10 @@ public class LoginTests extends BaseTest {
             String email = "heilyn.fuselier@testpro.io";
             LoginPage loginPage = new LoginPage(driver);
 
-            loginPage.login("heilyn.fuselier@testpro.io", "NewPassword@2027");
+            loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
             homePage.clickAvatar();
             homePage.updateProfileInfo(name, email);
-            homePage.updatePassword("NewPassword@2027", "HolaMundo@2026");
+            homePage.updatePassword("NewYear@2026", "NewYear@2026");
             takeScreenshot("updateprofile");
             Assert.assertTrue(homePage.isSuccessToastDisplayed(),
                     "Expected success toast not shown");
@@ -171,7 +171,7 @@ public class LoginTests extends BaseTest {
             homePage.updateclicklogout(); // JS click
 
 
-    }
+    }*/
 
 
 

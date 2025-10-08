@@ -1,4 +1,5 @@
 package pages;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -28,9 +29,13 @@ public class AllsongsPage extends BasePage{
     /* <button data-v-263c0e07="" data-v-03986d65="" orange="" title="Shuffle all songs" data-test="btn-shuffle-all" class="btn-shuffle-all" data-v-59142d4a=""><i data-v-03986d65="" data-v-263c0e07="" class="fa fa-random"></i> All
             </button> */
 
+    public void clickWithJS(WebElement element) {
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        executor.executeScript("arguments[0].click();", element);
+    }
     public void clickShufflebutton() {
 
-        click(shuffleAllButton);
+        clickWithJS(shuffleAllButton);
         System.out.println("Clicked on the Shuffle Button.");
 
     }
