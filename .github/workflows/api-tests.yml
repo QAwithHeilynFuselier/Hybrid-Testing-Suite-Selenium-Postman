@@ -8,15 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Newman
-        run: npm install -g newman
+      - name: Install Newman and Reporter
+        run: npm install -g newman newman-reporter-htmlextra
 
-      - name: Run Postman Collection
-        run: newman run "api-tests/Amazon_Edge_Cases_Suite.postman_collection.json" -r cli
+      - name: Run Postman Collection with Report
+        run: |
+          newman run "api-tests/Amazon_Edge_Cases_Suite.postman_collection.json" \
+          -r cli,htmlextra \
+          --reporter-htmlextra-export results/report.html
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-html-report
+          path: results/report.html
