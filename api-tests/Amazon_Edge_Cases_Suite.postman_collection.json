@@ -1,0 +1,215 @@
+{
+  "info": {
+    "_postman_id": "79719900-68cb-4eac-8e38-f2b81fbce047",
+    "name": "Amazon_Edge_Cases_Suite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51867100",
+    "_collection_link": "https://go.postman.co/collection/51867100-79719900-68cb-4eac-8e38-f2b81fbce047?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01_Search_Functionality",
+      "item": [
+        {
+          "name": "GET Search - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status Code es 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"La página muestra resultados para iPhone 15\", function () {\r",
+                  "  \r",
+                  "    var bodyText = pm.response.text().toLowerCase();\r",
+                  "    pm.expect(bodyText).to.include(\"iphone 15\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/s?k=iphone 15 pro max&sprefix=iphone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s"
+              ],
+              "query": [
+                {
+                  "key": "k",
+                  "value": "iphone 15 pro max"
+                },
+                {
+                  "key": "sprefix",
+                  "value": "iphone"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET  8000 chars",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "\r",
+                  "const longData = \"A\".repeat(8000);\r",
+                  "pm.collectionVariables.set(\"big_search_term\", longData);\r",
+                  "\r",
+                  "console.log(\"Generados 8000 caracteres para la variable: big_search_term\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test(\"Edge Case: Server handles excessive load correctly (Status 400)\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404, 414]);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Error Page shows: 'Sorry! We couldn't find that page'\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Sorry! We couldn't find that page\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Response time is within acceptable limits\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/s?k={{big_search_term}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "s"
+              ],
+              "query": [
+                {
+                  "key": "k",
+                  "value": "{{big_search_term}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Cart - Empty State Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Check for quantity limit message\", function () {\r",
+                  "    const responseBody = pm.response.text();\r",
+                  "    \r",
+                  "\r",
+                  "    const hasWarning = responseBody.includes(\"limit\") || \r",
+                  "                       responseBody.includes(\"maximum quantity\") || \r",
+                  "                       responseBody.includes(\"Sorry\") ||\r",
+                  "                       responseBody.includes(\"Lo sentimos\");\r",
+                  "    \r",
+                  "    pm.expect(hasWarning).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cart loads within 3 seconds\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://www.amazon.com/gp/cart/view.html",
+              "protocol": "https",
+              "host": [
+                "www",
+                "amazon",
+                "com"
+              ],
+              "path": [
+                "gp",
+                "cart",
+                "view.html"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02_Cart_Management",
+      "item": []
+    },
+    {
+      "name": "03_Negative_Testing",
+      "item": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "big_search_term",
+      "value": ""
+    }
+  ]
+}
