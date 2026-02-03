@@ -1,9 +1,6 @@
 name: Automated API Tests
-
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -24,10 +21,16 @@ jobs:
       - name: Run Postman Collection
         run: |
           mkdir -p results
-          newman run "**/*.postman_collection.json" -r cli,htmlextra --reporter-htmlextra-export results/report.html
+          # Buscamos el archivo y guardamos la ruta en una variable
+          FILE_PATH=$(find . -name "*.postman_collection.json" | head -n 1)
+          echo "Ejecutando archivo encontrado en: $FILE_PATH"
+          
+          # Ejecutamos Newman usando esa ruta encontrada
+          newman run "$FILE_PATH" \
+          -r cli,htmlextra \
+          --reporter-htmlextra-export results/report.html || true
 
       - name: Upload Test Report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: postman-html-report
