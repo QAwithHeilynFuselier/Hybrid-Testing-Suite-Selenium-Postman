@@ -1,10 +1,34 @@
-- name: Run Postman Collection
+name: Automated API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman and Reporter
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run Postman Collection
         run: |
           mkdir -p results
-          # Este comando busca el archivo .json en TODO el proyecto automáticamente
-          FILE_PATH=$(find . -name "*.postman_collection.json" | head -n 1)
-          echo "Found file at: $FILE_PATH"
-          
-          newman run "$FILE_PATH" \
-          -r cli,htmlextra \
-          --reporter-htmlextra-export results/report.html
+          newman run "**/*.postman_collection.json" -r cli,htmlextra --reporter-htmlextra-export results/report.html
+
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-html-report
+          path: results/report.html
