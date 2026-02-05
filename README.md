@@ -1,35 +1,36 @@
-# Ecommerce QA Automation Project
 
-[![API Tests](https://github.com/QAwithHeilynFuselier/ecommerce-qa-testing-project/actions/workflows/api-tests.yml/badge.svg)](https://github.com/QAwithHeilynFuselier/ecommerce-qa-testing-project/actions)
+Project Overview
+This project demonstrates a professional Hybrid QA Automation approach for the Koel music streaming platform. It implements a scalable architecture using the Page Object Model (POM) and Page Factory patterns to ensure clean, maintainable, and readable UI test code, alongside a robust API testing suite integrated into a CI/CD pipeline.
 
-##  Overview
-This project demonstrates a comprehensive **T-Shaped QA** approach for an E-commerce platform. It focuses on ensuring system reliability through automated API testing and CI/CD integration, with a roadmap toward Full-Stack Test Automation (UI + API).
+ Tech Stack
+UI Automation: Java, Selenium WebDriver, TestNG
 
-## Tech Stack
-* **API Testing:** [Postman](https://www.postman.com/) & [Newman](https://www.npmjs.com/package/newman)
-* **CI/CD:** [GitHub Actions](https://github.com/features/actions)
-* **Environment:** Node.js
-* **Planned:** Java, Selenium WebDriver, and Gradle for UI Automation.
+Design Pattern: Page Factory (Lazy Initialization & Object Repository)
 
-##  Automated Workflows
-### 1. API Testing (Postman + Newman)
-I have developed an automated test suite for the Amazon API (Edge Cases) located in the `api-tests/` directory.
-* **Coverage:** Validation of Status Codes, Response Time, JSON Schema, and Error Handling (Edge Cases).
-* **Automation:** Integrated with GitHub Actions to trigger automatically on every `push` to the main branch.
+API Testing: Postman & Newman
 
-### 2. Continuous Integration (CI)
-The project uses a custom GitHub Actions workflow (`.github/workflows/api-tests.yml`) that:
-1.  Spins up a virtual Ubuntu environment.
-2.  Installs Node.js and Newman.
-3.  Executes the Postman collection.
-4.  Reports results directly in the **Actions** tab.
+CI/CD: GitHub Actions
 
-##  Project Structure
-* `api-tests/`: Postman Collections and Environment variables.
-* `.github/workflows/`: CI/CD Pipeline configuration files.
-* `ui-tests/`: (In Progress) Selenium WebDriver scripts.
+Build Tool: Maven
 
-##  How to Run Locally
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/QAwithHeilynFuselier/ecommerce-qa-testing-project.git](https://github.com/QAwithHeilynFuselier/ecommerce-qa-testing-project.git)
+ Automated Workflows
+1. UI Automation (Page Factory Model)
+I have developed a modular UI testing suite located in the ui-tests/ directory.
+
+Coverage: User authentication (Edge Cases), Info Panel validation (Lyrics, Artist, Album), and Shuffle functionality.
+
+Logic: Implemented intelligent validation for "Unknown" metadata and fallback messages (e.g., the "Bach" lyrics message).
+
+2. API Testing (Postman + Newman)
+Located in the api-tests/ directory, this suite validates the backend stability.
+
+Coverage: Status Codes, Response Time, JSON Schema validation, and Error Handling.
+
+CI Integration: Automatically triggered on every push to the main branch via GitHub Actions.
+
+Project Structure
+src/test/java/: UI Test Scripts and Page Objects.
+
+api-tests/: Postman Collections and Environment variables.
+
+.github/workflows/: CI/CD Pipeline configuration (YAML).
