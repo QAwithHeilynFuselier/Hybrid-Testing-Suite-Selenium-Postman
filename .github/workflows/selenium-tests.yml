@@ -2,11 +2,13 @@ name: UI Testing Execution
 
 on:
   push:
+    branches: [ main ]
+   
     paths:
       - 'ui-tests/**'
       - 'src/**'
       - 'pom.xml'
-  workflow_dispatch:
+  workflow_dispatch: 
 
 jobs:
   ui-automation:
@@ -25,17 +27,24 @@ jobs:
 
     - name: Run Selenium Tests
       run: |
-      
-        POM_PATH=$(find . -name "pom.xml" | head -n 1)
-        echo "Proyecto encontrado en: $POM_PATH"
    
-     
+        POM_PATH=$(find . -name "pom.xml" | head -n 1)
+        
+        if [ -z "$POM_PATH" ]; then
+          echo "ERROR: No se encontró el archivo pom.xml en ninguna carpeta."
+          exit 1
+        fi
+        
+        echo "Proyecto de Selenium encontrado en: $POM_PATH"
+        
+
+        # -Dheadless=true permite que Chrome corra en el servidor sin monitor
         mvn test -f "$POM_PATH" -Dheadless=true
 
     - name: Upload Test Reports
-      if: always() 
+      if: always() # Se ejecuta aunque los tests fallen para ver la evidencia
       uses: actions/upload-artifact@v4
       with:
         name: ui-test-results
-   
+    
         path: "**/target/surefire-reports/"
