@@ -6,7 +6,7 @@ This repository contains an automated testing framework designed for scalability
 ##  Live Test Reports
 The project is integrated with a CI/CD pipeline that generates and hosts an Allure Report automatically.
 
-👉 **[View Live Allure Report](https://qawithheilynfuselier.github.io/Hybrid-Testing-Suite-Selenium-Postman/)**
+**[View Live Allure Report](https://qawithheilynfuselier.github.io/Hybrid-Testing-Suite-Selenium-Postman/)**
 
 ---
 
