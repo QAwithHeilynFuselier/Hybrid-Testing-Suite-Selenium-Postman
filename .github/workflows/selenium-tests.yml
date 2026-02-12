@@ -9,6 +9,7 @@ jobs:
   ui-automation:
     runs-on: ubuntu-latest
 
+    # Permisos vitales para que GitHub pueda crear la rama del reporte
     permissions:
       contents: write
 
@@ -28,13 +29,17 @@ jobs:
         run: |
           echo "--- COMPROBANDO ARCHIVOS ---"
           ls -la
+          
           if [ ! -f "gradlew" ]; then
+            echo "Gradlew no encontrado, intentando generarlo..."
             gradle wrapper
           fi
+          
           chmod +x gradlew
+          # Ejecución de tus 8 tests en modo headless para el servidor
           ./gradlew test -Dheadless=true --stacktrace
 
-      - name: Upload Test Reports
+      - name: Upload Test Reports (JUnit XML)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -59,6 +64,11 @@ jobs:
           gh_pages: gh-pages
           allure_report: allure-report
           allure_history: allure-history
+          keep_reports: 20
+
+      - name: Create history folder if missing
+        if: always()
+        run: mkdir -p allure-history # Solución al error de git push
 
       - name: Deploy to GitHub Pages
         if: always()
