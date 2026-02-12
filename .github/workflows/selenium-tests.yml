@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'ui-tests/**'
+      - 'src/**'
+      - 'pom.xml'
   workflow_dispatch:
 
 jobs:
@@ -22,12 +24,18 @@ jobs:
         cache: maven
 
     - name: Run Selenium Tests
-      run: mvn test -f ui-tests/pom.xml 
-
+      run: |
+      
+        POM_PATH=$(find . -name "pom.xml" | head -n 1)
+        echo "Proyecto encontrado en: $POM_PATH"
+   
+     
+        mvn test -f "$POM_PATH" -Dheadless=true
 
     - name: Upload Test Reports
-      if: always() # Muy importante: se ejecuta aunque los tests fallen
+      if: always() 
       uses: actions/upload-artifact@v4
       with:
         name: ui-test-results
-        path: ui-tests/target/surefire-reports/
+   
+        path: "**/target/surefire-reports/"
