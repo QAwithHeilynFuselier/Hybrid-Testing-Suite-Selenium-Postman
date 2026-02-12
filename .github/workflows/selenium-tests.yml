@@ -3,8 +3,8 @@ name: UI Testing Execution
 on:
   push:
     paths:
-      - 'ui-tests/**' # Solo se dispara si cambias algo en la carpeta de UI
-  workflow_dispatch: # Te permite darle al botón "Play" manualmente en GitHub
+      - 'ui-tests/**'
+  workflow_dispatch:
 
 jobs:
   ui-automation:
@@ -22,5 +22,12 @@ jobs:
         cache: maven
 
     - name: Run Selenium Tests
-      # Asegúrate de que el comando apunte a donde está tu pom.xml de UI
-      run: mvn test -f ui-tests/pom.xml
+      run: mvn test -f ui-tests/pom.xml 
+
+
+    - name: Upload Test Reports
+      if: always() # Muy importante: se ejecuta aunque los tests fallen
+      uses: actions/upload-artifact@v4
+      with:
+        name: ui-test-results
+        path: ui-tests/target/surefire-reports/
