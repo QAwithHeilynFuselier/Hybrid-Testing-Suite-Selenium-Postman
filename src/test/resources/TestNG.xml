@@ -3,6 +3,12 @@
 
 <suite name="TestNG">
     <parameter name="BaseUrl" value="https://qa.koel.app/"/>
+
+    <!-- LISTENER DE ALLURE -->
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
     <test name="Internship Sprint 9" preserve-order="true">
         <classes>
             <class name="LoginTests"/>
