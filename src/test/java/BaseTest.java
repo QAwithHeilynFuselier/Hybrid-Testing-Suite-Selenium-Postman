@@ -1,4 +1,5 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Attachment;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -77,12 +78,20 @@ public class BaseTest {
             e.printStackTrace();
         }
     }
+
+    @Attachment(value = "Screenshot on Failure", type = "image/png")
+    public byte[] saveScreenshot(WebDriver driver) {
+        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+    }
+
+
+
     @AfterMethod
-    public void tearDown() {
-        if (driver != null) {
-            driver.manage().deleteAllCookies();
-            driver.quit();
+    public void tearDown(ITestResult result) {
+        if (ITestResult.FAILURE == result.getStatus()) {
+            saveScreenshot(driver); //fail test
         }
+        driver.quit();
     }
 
 
