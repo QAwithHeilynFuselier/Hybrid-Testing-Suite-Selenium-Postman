@@ -9,7 +9,6 @@ jobs:
   ui-automation:
     runs-on: ubuntu-latest
 
-    # Permisos necesarios para publicar el reporte en GitHub Pages
     permissions:
       contents: write
 
@@ -29,12 +28,9 @@ jobs:
         run: |
           echo "--- COMPROBANDO ARCHIVOS ---"
           ls -la
-          
           if [ ! -f "gradlew" ]; then
-            echo "Gradlew no encontrado, intentando generarlo..."
             gradle wrapper
           fi
-          
           chmod +x gradlew
           ./gradlew test -Dheadless=true --stacktrace
 
@@ -47,7 +43,6 @@ jobs:
             **/build/reports/tests/test/
             **/build/test-results/test/
 
-      # --- NUEVOS PASOS PARA ALLURE ---
       - name: Load Allure history
         uses: actions/checkout@v4
         if: always()
@@ -71,3 +66,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-history
+          publish_branch: gh-pages
+          force_orphan: true
