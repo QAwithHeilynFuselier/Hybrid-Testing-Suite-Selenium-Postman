@@ -10,43 +10,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        ref: HeilynPracticeKoel
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: HeilynPracticeKoel
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Find and Run Gradle Tests
-      run: |
-        # 1. Localizamos dinámicamente el archivo gradlew
-        GRADLE_PATH=$(find . -name "gradlew" -print -quit)
-        
-        if [ -z "$GRADLE_PATH" ]; then
-          echo "ERROR: No se encontró el archivo gradlew. Verifica la estructura de carpetas."
-          exit 1
-        fi
-        
-        GRADLE_DIR=$(dirname "$GRADLE_PATH")
-        echo "Proyecto encontrado en: $GRADLE_DIR"
-        
-  
-        cd "$GRADLE_DIR"
-        chmod +x gradlew
-        
-        
-        ./gradlew test -Dheadless=true --continue
+      - name: Debug and Run
+        run: |
+          echo "--- BUSCANDO PROYECTO ---"
+          GRADLE_PATH=$(find . -name "gradlew" -print -quit)
+          
+          if [ -z "$GRADLE_PATH" ]; then
+            echo "ERROR: No se encontró el archivo gradlew. Verifica tus carpetas."
+            ls -R
+            exit 1
+          fi
+          
+          GRADLE_DIR=$(dirname "$GRADLE_PATH")
+          echo "Proyecto encontrado en: $GRADLE_DIR"
+          
+          cd "$GRADLE_DIR"
+          chmod +x gradlew
+          
+          # Ejecutamos con --stacktrace para ver el error real si falla
+          ./gradlew test -Dheadless=true --stacktrace
 
-    - name: Upload Test Reports
-      # El if: always() asegura que siempre veas por qué falló el test
-      if: always() 
-      uses: actions/upload-artifact@v4
-      with:
-        name: ui-test-results
-        path: |
-          **/build/reports/tests/test/
-          **/build/test-results/test/
+      - name: Upload Test Reports
+        if: always() 
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: |
+            **/build/reports/tests/test/
+            **/build/test-results/test/
