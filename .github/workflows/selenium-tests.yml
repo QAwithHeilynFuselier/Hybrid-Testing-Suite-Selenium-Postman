@@ -13,7 +13,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-        ref: HeilynPracticeKoel 
+        ref: HeilynPracticeKoel
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -21,11 +21,24 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Run Selenium Tests (Gradle)
+    - name: Find and Run Gradle Tests
       run: |
-       
+        # 1. Buscamos dónde está el archivo gradlew
+        GRADLE_PATH=$(find . -name "gradlew" -print -quit)
+        
+        if [ -z "$GRADLE_PATH" ]; then
+          echo "ERROR: No se encontró el archivo gradlew en ninguna carpeta."
+          ls -R # Esto nos dirá qué archivos hay realmente
+          exit 1
+        fi
+        
+        # 2. Obtenemos el directorio donde vive gradlew
+        GRADLE_DIR=$(dirname "$GRADLE_PATH")
+        echo "Proyecto encontrado en: $GRADLE_DIR"
+        
+        # 3. Entramos a esa carpeta y ejecutamos
+        cd "$GRADLE_DIR"
         chmod +x gradlew
-  
         ./gradlew test -Dheadless=true
 
     - name: Upload Test Reports
@@ -33,5 +46,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ui-test-results
-     
         path: "**/build/reports/tests/test/"
