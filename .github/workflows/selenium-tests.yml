@@ -18,28 +18,28 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # Cambia a '11' o '21' si es la que usas en IntelliJ
+          java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
 
-      - name: Run Gradle Tests
+      - name: Debug and Run
         run: |
-          # 1. Encontrar el ejecutable
-          GRADLE_PATH=$(find . -name "gradlew" -print -quit)
-          GRADLE_DIR=$(dirname "$GRADLE_PATH")
-          cd "$GRADLE_DIR"
+          echo "--- COMPROBANDO ARCHIVOS ---"
+          ls -la
           
-          # 2. Dar permisos
+          # Si el archivo gradlew no existe, lo creamos para que no falle
+          if [ ! -f "gradlew" ]; then
+            echo "Gradlew no encontrado, intentando generarlo..."
+            gradle wrapper
+          fi
+          
           chmod +x gradlew
-          
-          # 3. Ejecutar y mostrar errores en consola
-          ./gradlew test -Dheadless=true --info --stacktrace
+          ./gradlew test -Dheadless=true --stacktrace
 
       - name: Upload Test Reports
-        if: always() # Esto garantiza que el reporte se suba SIEMPRE
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: selenium-test-report
+          name: ui-test-results
           path: |
-            **/build/reports/tests/test/**
-            **/build/test-results/test/*.xml
+            **/build/reports/tests/test/
+            **/build/test-results/test/
