@@ -1,10 +1,14 @@
 package pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class InfoPanelPage extends BasePage {
     /*elements<button aria-controls="extraPanelLyrics" id="extraTabLyrics" role="tab">
@@ -50,6 +54,13 @@ public class InfoPanelPage extends BasePage {
 
     @FindBy(css = "#extraPanelLyrics [data-v-f3a790c2]")
     private WebElement lyricsContent;
+
+
+    @FindBy(css = "tr.playing td.artist")
+    private WebElement artistNameElement;
+
+    @FindBy(css = "tr.playing td.title")
+    private WebElement songTitleElement;
 
 
     public InfoPanelPage(WebDriver givenDriver) {
@@ -210,5 +221,31 @@ public class InfoPanelPage extends BasePage {
         System.out.println("--- Validation Complete ---");
     }
 
-}
+       public String getArtistFromInfoPanel() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOf(artistNameElement));
+        return artistNameElement.getText();
+    }
+
+
+
+        public String getSongTitleFromUI() {
+            try {
+
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+                wait.until(driver -> songTitleElement.getText().length() > 0);
+                return songTitleElement.getText();
+            } catch (Exception e) {
+
+                return "Unknown Song";
+            }
+        }
+
+
+
+
+    }
+
 

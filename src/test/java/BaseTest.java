@@ -87,11 +87,18 @@ public class BaseTest {
 
 
     @AfterMethod
+
     public void tearDown(ITestResult result) {
         if (ITestResult.FAILURE == result.getStatus()) {
-            saveScreenshot(driver); //fail test
+
+
+            System.out.println(" El test '" + result.getName() + "' fail.");
+            System.out.println(" allure no working with java version.");
         }
-        driver.quit();
+
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
 

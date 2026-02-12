@@ -10,7 +10,10 @@ import org.testng.annotations.Test;
 import pages.*;
 import io.qameta.allure.Description;
 import io.qameta.allure.Step;
+import utils.SqlManager;
+import utils.SqlQueries;
 
+import java.sql.SQLException;
 import java.time.Duration;
 
 
@@ -170,6 +173,48 @@ public class LoginTests extends BaseTest {
                     "Expected success toast not shown");
             homePage.updateclicklogout(); // JS click
 
+    }
+
+
+
+    @Test(priority = 8, description = "Database-Driven Testing Dinámico")
+    public void verifyArtistNameFromDatabase() throws SQLException {
+        LoginPage loginPage = new LoginPage(driver);
+        AllsongsPage allSongs = new AllsongsPage(driver);
+        InfoPanelPage infoPanel = new InfoPanelPage(driver);
+
+        loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
+        allSongs.clickAllSongs();
+
+        allSongs.clickShufflebutton();
+
+        String currentSong = infoPanel.getSongTitleFromUI();
+
+        String expectedArtist = SqlQueries.getArtistBySongTitle(currentSong);
+
+        String actualArtist = infoPanel.getArtistFromInfoPanel();
+        takeScreenshot("song playing");
+        Assert.assertEquals(actualArtist, expectedArtist, "no data: " + currentSong);
+    }
+
+    @Test  (priority = 9, description = "renamePlaylistFlow")
+    public void renamePlaylistFlow() {
+
+        String newName = "Christmas";
+        int userId = 29861;
+        LoginPage loginPage = new LoginPage(driver);
+        PlayListPage playListPage = new PlayListPage(driver);
+        loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
+
+        playListPage.OpenPlaylist();
+        playListPage.rightClickPlaylist(3);
+        playListPage.clickEditOption();
+
+        playListPage.enterNewPlaylistName(newName);
+        String dbName = SqlManager.getPlaylistNameFromDb(userId, newName);
+
+
+        Assert.assertEquals(dbName, newName, "database is no working");
     }
 
 }

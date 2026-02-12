@@ -90,17 +90,7 @@ public class HomePage  extends BasePage {
 
 
     }
-    public String getSuccessMessageText() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
 
-        WebElement toast = wait.until(
-                ExpectedConditions.presenceOfElementLocated(
-                        By.cssSelector("div.success")
-                )
-        );
-
-        return toast.getText();
-    }
 
 
     public void clickLogoutJS() {
