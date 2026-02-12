@@ -1,4 +1,4 @@
-name: UI Testing Execution (CI/CD Pipeline)
+name: UI Testing Execution
 
 on:
   push:
@@ -18,34 +18,28 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '17' # Cambia a '11' o '21' si es la que usas en IntelliJ
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Debug and Run
+      - name: Run Gradle Tests
         run: |
-          echo "--- BUSCANDO PROYECTO ---"
+          # 1. Encontrar el ejecutable
           GRADLE_PATH=$(find . -name "gradlew" -print -quit)
-          
-          if [ -z "$GRADLE_PATH" ]; then
-            echo "ERROR: No se encontró el archivo gradlew. Verifica tus carpetas."
-            ls -R
-            exit 1
-          fi
-          
           GRADLE_DIR=$(dirname "$GRADLE_PATH")
-          echo "Proyecto encontrado en: $GRADLE_DIR"
-          
           cd "$GRADLE_DIR"
+          
+          # 2. Dar permisos
           chmod +x gradlew
           
-          # Ejecutamos con --stacktrace para ver el error real si falla
-          ./gradlew test -Dheadless=true --stacktrace
+          # 3. Ejecutar y mostrar errores en consola
+          ./gradlew test -Dheadless=true --info --stacktrace
 
       - name: Upload Test Reports
-        if: always() 
+        if: always() # Esto garantiza que el reporte se suba SIEMPRE
         uses: actions/upload-artifact@v4
         with:
-          name: ui-test-results
+          name: selenium-test-report
           path: |
-            **/build/reports/tests/test/
-            **/build/test-results/test/
+            **/build/reports/tests/test/**
+            **/build/test-results/test/*.xml
