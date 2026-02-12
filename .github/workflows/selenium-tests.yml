@@ -2,12 +2,7 @@ name: UI Testing Execution
 
 on:
   push:
-    branches: [ main ]
-   
-    paths:
-      - 'ui-tests/**'
-      - 'src/**'
-      - 'pom.xml'
+    branches: [ "HeilynPracticeKoel", "main" ]
   workflow_dispatch: 
 
 jobs:
@@ -17,34 +12,29 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        ref: HeilynPracticeKoel # Forzamos a que use tu rama con código
 
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
     - name: Run Selenium Tests
       run: |
-   
-        POM_PATH=$(find . -name "pom.xml" | head -n 1)
-        
-        if [ -z "$POM_PATH" ]; then
-          echo "ERROR: No se encontró el archivo pom.xml en ninguna carpeta."
-          exit 1
-        fi
-        
-        echo "Proyecto de Selenium encontrado en: $POM_PATH"
-        
-
-        # -Dheadless=true permite que Chrome corra en el servidor sin monitor
-        mvn test -f "$POM_PATH" -Dheadless=true
+        # En Gradle no usamos 'mvn test', usamos './gradlew test'
+        # Damos permisos de ejecución al wrapper
+        chmod +x gradlew
+        ./gradlew test -Dheadless=true
 
     - name: Upload Test Reports
-      if: always() # Se ejecuta aunque los tests fallen para ver la evidencia
+      if: always() 
       uses: actions/upload-artifact@v4
       with:
         name: ui-test-results
-    
-        path: "**/target/surefire-reports/"
+        # Gradle guarda los reportes en build/reports/
+        path: "**/build/reports/tests/test/"
