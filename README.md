@@ -2,7 +2,7 @@
 Project Overview
 This project demonstrates a professional Hybrid QA Automation approach for the Koel music streaming platform. It implements a scalable architecture using the Page Object Model (POM) and Page Factory patterns to ensure clean, maintainable, and readable UI test code, alongside a robust API testing suite integrated into a CI/CD pipeline.
 
-🛠 Tech Stack
+Tech Stack
 UI Automation: Java, Selenium WebDriver, TestNG
 
 Design Pattern: Page Factory (Lazy Initialization & Object Repository)
