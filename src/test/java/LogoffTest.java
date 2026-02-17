@@ -7,11 +7,11 @@ import pages.HomePage;
 import pages.LoginPage;
 
 public class LogoffTest extends BaseTest {
-    @BeforeMethod
-    @Parameters({"BaseUrl"})
-    public void setup(String BaseUrl) {
-        launchBrowser(BaseUrl);
-    }
+        @BeforeMethod
+        @Parameters({"BaseUrl", "browser", "gridUrl"})
+        public void setup(String BaseUrl, String browser, String gridUrl) {
+            launchBrowser(BaseUrl, browser, gridUrl);
+        }
 
     @Test(priority = 1, description = "Log out success")
     public void logoutSuccessTest() {

@@ -4,19 +4,17 @@ import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
+import java.net.URL;
+import java.net.MalformedURLException;
 import org.testng.annotations.Parameters;
-
-
-import org.testng.ITestResult;
-import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -30,19 +28,16 @@ public class BaseTest {
 
 
     @BeforeSuite
-    static void setupClass() {
-        WebDriverManager.chromedriver().setup();
-    }
+    @Parameters({"BaseUrl", "browser", "gridUrl"})
 
 
-
-    public void setUp(String baseUrl) {
+    public void setUp(String baseUrl,String browser, String gridUrl) {
         this.url = baseUrl;
-        launchBrowser(this.url);
+        launchBrowser(this.url, browser, gridUrl);
 
     }
 
-    public void launchBrowser(String baseUrl) {
+    public void launchBrowser(String baseUrl, String browser,String gridUrl ) {
 
         this.url = baseUrl;
         ChromeOptions options = new ChromeOptions();
@@ -50,19 +45,34 @@ public class BaseTest {
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
         options.addArguments("--start-maximized");
-        options.addArguments("--headless=new");
+        if (System.getenv("CHROME_HEADLESS") != null) {
+            options.addArguments("--headless=new");
+        }
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        try {
 
-        driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        actions = new Actions(driver);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            driver = new RemoteWebDriver(new URL(gridUrl), options);
 
-        if (baseUrl != null) {
-            driver.get(baseUrl);
+
+            if (driver != null) {
+                wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+                actions = new Actions(driver);
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+
+                if (baseUrl != null) {
+                    driver.get(baseUrl);
+                }
+            }
+        } catch (MalformedURLException e) {
+            System.err.println("URL del Grid mal formateada: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("No se pudo conectar al Selenium Grid: " + e.getMessage());
+
         }
     }
+
+
     public void navigatetoPage() {
         driver.get(url);
     }
