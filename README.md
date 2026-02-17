@@ -26,7 +26,12 @@ Logic: Implemented intelligent validation for "Unknown" metadata and fallback me
 
 Architecture: Leverage Page Factory for efficient element locating and reduced code duplication.
 
-2. API Testing (Postman + Newman)
+2. Backend & Database Validation (New)
+Data Integrity: Integrated SQL queries to perform backend checks, ensuring that data actions performed via the UI (like updating a profile or adding a song) are accurately reflected in the database [cite: 2026-02-04].
+
+Troubleshooting: Facilitates faster root-cause analysis by identifying if a bug is in the UI layer or the data layer [cite: 2026-02-04].
+
+3. API Testing (Postman + Newman)
 Located in the api-tests/ directory, validating backend stability.
 
 Coverage: Status Codes, Response Time, JSON Schema validation, and Error Handling.
