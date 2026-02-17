@@ -8,8 +8,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import pages.*;
-import io.qameta.allure.Description;
-import io.qameta.allure.Step;
+
 import utils.SqlManager;
 import utils.SqlQueries;
 
@@ -19,10 +18,10 @@ import java.time.Duration;
 
 public class LoginTests extends BaseTest {
    @BeforeMethod
-    @Parameters({"BaseUrl"})
+   @Parameters({"BaseUrl", "browser", "gridUrl"})
 
-    public void setup(String BaseUrl) {
-       launchBrowser(BaseUrl);
+    public void setup(String BaseUrl, String browser, String gridUrl) {
+       launchBrowser(BaseUrl, browser, gridUrl);
        navigatetoPage();
 
    }
