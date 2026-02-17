@@ -10,23 +10,19 @@ The project is integrated with a CI/CD pipeline that generates and hosts an Allu
 
 ---
 
-## Technical Implementation
+ Technical Implementation
 
-### UI Automation
-* **Architecture**: Implemented **Page Object Model (POM)** to separate test logic from UI elements [cite: 2026-01-28, 2026-02-04].
-* **Design Pattern**: Utilized **Page Factory** for efficient element initialization and to reduce boilerplate code [cite: 2026-01-28, 2026-02-04].
-* **Language/Framework**: Developed using **Java 17** and **Selenium WebDriver** [cite: 2026-02-04].
+UI & Backend Automation
+Architecture: Implemented the Page Object Model (POM) to separate test logic from UI elements, ensuring a clean "Separation of Concerns" [cite: 2026-01-28, 2026-02-04].
 
-### CI/CD Pipeline
+Design Pattern: Utilized Page Factory for efficient element initialization, which improves script maintainability and reduces boilerplate code [cite: 2026-01-28, 2026-02-04].
+
+Database Validation (New): Integrated SQL queries via JDBC to perform backend data integrity checks. This ensures that information displayed on the UI is consistent with the database records [cite: 2026-02-04].
+
+Language/Framework: Developed using Java 17 and Selenium WebDriver [cite: 2026-02-04].
+
+ CI/CD Pipeline
 * **GitHub Actions**: Automated the entire execution flow on every push [cite: 2026-02-04].
 * **Reporting**: Integrated **Allure Reports** with history tracking to monitor test stability over time [cite: 2026-02-04].
 * **Environment**: Tests run in **Headless mode** within an Ubuntu-based runner [cite: 2026-02-04].
 
----
-
-##  How to Run Locally
-1. Clone the repository.
-2. Ensure you have **JDK 17** installed.
-3. Run the following command in the terminal:
-   ```bash
-   ./gradlew test
