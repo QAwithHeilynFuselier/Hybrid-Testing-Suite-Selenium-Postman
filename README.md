@@ -24,12 +24,17 @@ Language/Framework: Developed using Java 17 and Selenium WebDriver
  CI/CD Pipeline
 * **GitHub Actions**: Automated the entire execution flow on every push
 * **Reporting**: Integrated **Allure Reports** with history tracking to monitor test stability over time 
-* **Environment**: Tests run in **Headless mode** within an Ubuntu-based runner 
+* **Environment**: Tests run in **Headless mode** within an Ubuntu-based runner.
 
 
-# Advanced AI & Performance Modules
-AI Reliability & LLM Evaluation: Integrated a Python-based evaluation engine to detect LLM Hallucinations and biases, using a "Model-as-a-Judge" approach to compare model outputs against ground-truth data.
+Performance & Scalability Engineering
+Beyond functional automation, this framework includes dedicated performance testing suites to ensure system reliability under pressure:
 
-Performance & Scalability Engineering: Developed comprehensive load and stress test suites using Apache JMeter (.jmx) to identify authentication bottlenecks and ensure system stability under high-traffic scenarios.
+***Load & Stress Testing: Developed and executed .jmx scripts using Apache JMeter to simulate high-user concurrency and identify system breaking points.
 
- Multi-Language Hybrid Architecture: Orchestrated a cross-platform environment managing Java (JDK) for UI/API and Python (Virtual Environments) for AI validation within a single IDE structure
+***Targeted Scenarios: Implemented specific tests for critical flows, such as Koel_Login_LoadTest.jmx and Koel_Stress_Test.jmx, to validate authentication stability .
+
+***Bottleneck Identification: Analyzed key performance indicators (KPIs) including Throughput, Latency, and Error Rates to diagnose server-side degradation.
+
+****Infrastructure Analysis: Evaluated how concurrent traffic impacts backend resources, ensuring the database and server maintain integrity during peak loads
+
