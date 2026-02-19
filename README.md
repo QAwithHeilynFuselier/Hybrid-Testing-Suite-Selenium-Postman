@@ -1,20 +1,23 @@
 
-
-AI Evaluation Framework (LLM Reliability)
-This feature branch introduces an advanced evaluation layer designed to audit and validate Generative AI outputs. The focus is shifted from functional UI testing to Model Reliability and Safety.
+AI Evaluation Framework: LLM Reliability (Java Edition)
+This feature branch introduces an advanced evaluation layer designed to audit and validate Generative AI outputs. The focus shifts from traditional functional UI testing to Model Reliability, Safety, and Truthfulness using a native Java stack.
 
 Key Features
-Hallucination Detection: Implementation of a "Model-as-a-Judge" script (Model_Hallucination_Check.py) that compares LLM outputs against ground-truth reference data to identify fabricated information.
+Java-Native Hallucination Detection: Implementation of a "Model-as-a-Judge" architecture using Java service classes. It compares LLM outputs against ground-truth reference data to identify fabricated information without leaving the JVM.
 
-Adversarial & Bias Testing: Automated suites to test model resilience against manipulative prompts and evaluate fairness across different datasets.
+Adversarial & Bias Testing Suites: Automated TestNG/JUnit suites that leverage Data Providers to inject manipulative prompts (Jailbreaking) and evaluate model fairness across diverse datasets.
 
-Hybrid SDK Orchestration: Leverages a custom environment setup where Java (JDK) manages the web infrastructure and Python (Virtual Environments) handles the AI evaluation logic.
+Unified SDK Orchestration: Eliminated Python dependency. The project now leverages a single JDK environment (managed via File > Project Structure > SDKs) to handle both the Web Infrastructure (Selenium/Playwright) and the AI Evaluation logic.
 
-Automated AI Auditing: Integration of OpenAI's API to programmatically score the accuracy and relevance of AI-generated responses.
+Programmatic AI Auditing: Direct integration with OpenAI/Gemini Java SDKs to programmatically score the accuracy, toxicity, and relevance of AI-generated responses.
 
 Technical Implementation
-Language: Python 3.x .
+Language: Java 17+
 
-Environment Management: Utilizes .venv for dependency isolation and requirements tracking.
+Build Tool: Maven / Gradle (Centralized dependency management in pom.xml).
 
-Core Logic: Uses heuristic and LLM-based comparisons to determine if a response is a "Hallucination" or "Verified Fact
+Testing Engine: TestNG with Page Factory for seamless UI interaction.
+
+Environment: Pure Java (No .venv or Python interpreters required).
+
+Core Logic: Uses LLM-based Semantic Comparison and heuristic checks to determine if a response is a "Hallucination" or a "Verified Fact."
