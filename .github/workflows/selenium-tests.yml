@@ -9,7 +9,7 @@ jobs:
   ui-automation:
     runs-on: ubuntu-latest
 
-    # Levantamos el Grid dentro de GitHub para que el RemoteWebDriver tenga a donde conectar
+    # Levantamos el Grid dentro de GitHub para evitar el ConnectTimeoutException
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
@@ -33,9 +33,8 @@ jobs:
 
     - name: Run Selenium Tests
       run: |
-        # Usamos 'gradle' directamente porque no usas el wrapper (gradlew)
-        # -DCHROME_HEADLESS=true activa tu lógica de ChromeOptions
-        # -DgridUrl apunta al servicio de Selenium Grid que levantamos arriba
+        # Usamos 'gradle' directamente ya que no usas el wrapper
+        # -DgridUrl sobreescribe tu IP local (10.0.0.43) por la del Grid de GitHub
         gradle test -DCHROME_HEADLESS=true -DgridUrl=http://localhost:4444/wd/hub
 
     - name: Upload Test Reports
