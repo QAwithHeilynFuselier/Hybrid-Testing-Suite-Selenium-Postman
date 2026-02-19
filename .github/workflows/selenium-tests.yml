@@ -12,6 +12,13 @@ jobs:
     permissions:
       contents: write
 
+    # ESTO EVITA QUE EL TEST SE CAIGA: Crea el navegador en la nube
+    services:
+      selenium-grid:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -24,17 +31,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Run Tests
         env:
-          # Esta variable activa el modo headless en tu clase BaseTest
           CHROME_HEADLESS: "true"
         run: |
-          if [ ! -f "gradlew" ]; then
-            gradle wrapper
-          fi
-          chmod +x gradlew
-          # Ejecutamos los tests de Gradle usando el XML configurado
-          ./gradlew test --stacktrace
+          # Si no usas wrapper, usamos 'gradle' directamente.
+          # Forzamos gridUrl a localhost para que ignore tu IP de casa 10.0.0.43
+          gradle test -DgridUrl=http://localhost:4444/wd/hub --stacktrace
 
       - name: Load Allure history
         uses: actions/checkout@v4
