@@ -1,73 +1,36 @@
-name: UI Testing Execution
-
+name: Automated API Tests
 on:
   push:
-    branches: [ "HeilynPracticeKoel", "main" ]
-  workflow_dispatch: 
+    branches: [ main ]
 
 jobs:
-  ui-automation:
+  run-api-tests:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    # 1. INFRAESTRUCTURA PARA GITHUB: Crea el navegador en la nube
-    services:
-      selenium-grid:
-        image: selenium/standalone-chrome:latest
-        ports:
-          - 4444:4444
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        ref: HeilynPracticeKoel
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+      - name: Install Newman and Reporter
+        run: npm install -g newman newman-reporter-htmlextra
 
-    - name: Run Tests
-      env:
-        CHROME_HEADLESS: "true"
-      run: |
-        # LÓGICA HÍBRIDA (Compatible con Jenkins y GitHub)
-        if [ ! -f "gradlew" ]; then
-          gradle wrapper
-        fi
-        chmod +x gradlew
-
-
-    - name: Load Allure history
-      uses: actions/checkout@v4
-      if: always()
-      continue-on-error: true
-      with:
-        ref: gh-pages
-        path: gh-pages
-
-    - name: Generate Allure Report
-      uses: simple-elf/allure-report-action@master
-      if: always()
-      id: allure-report
-      with:
-        allure_results: build/allure-results
-        gh_pages: gh-pages
-        allure_report: allure-report
-        allure_history: allure-history
-        keep_reports: 20
-
-    - name: Deploy to GitHub Pages
-      if: always()
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: allure-history
-        publish_branch: gh-pages
+      - name: Run Postman Collection
+        run: |
+          mkdir -p results
+          # Buscamos el archivo y guardamos la ruta en una variable
+          FILE_PATH=$(find . -name "*.postman_collection.json" | head -n 1)
+          echo "Ejecutando archivo encontrado en: $FILE_PATH"
+          
+          # Ejecutamos Newman usando esa ruta encontrada
+          newman run "$FILE_PATH" \
+          -r cli,htmlextra \
+          --reporter-htmlextra-export results/report.html || true
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-html-report
+          path: results/report.html
