@@ -12,7 +12,6 @@ jobs:
     permissions:
       contents: write
 
-    # ESTO EVITA QUE EL TEST SE CAIGA: Crea el navegador en la nube
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
@@ -38,9 +37,14 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # Si no usas wrapper, usamos 'gradle' directamente.
-          # Forzamos gridUrl a localhost para que ignore tu IP de casa 10.0.0.43
-          gradle test -DgridUrl=http://localhost:4444/wd/hub --stacktrace
+          # 1. ESPERA ACTIVA: GitHub espera a que el Grid responda "ready"
+          echo "Esperando a que Selenium Grid esté listo..."
+          timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
+          echo "Grid está UP!"
+
+          # 2. EJECUCIÓN: Usamos 'gradle' y la URL limpia (sin /wd/hub)
+          # Esto sobreescribe tu IP 10.0.0.43 solo durante este paso.
+          gradle test -DgridUrl=http://localhost:4444 --stacktrace
 
       - name: Load Allure history
         uses: actions/checkout@v4
