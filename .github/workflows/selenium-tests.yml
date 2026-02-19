@@ -25,12 +25,16 @@ jobs:
           distribution: 'temurin'
 
       - name: Run Tests
+        env:
+          # Esta variable activa el modo headless en tu clase BaseTest
+          CHROME_HEADLESS: "true"
         run: |
           if [ ! -f "gradlew" ]; then
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew test -Dheadless=true --stacktrace
+          # Ejecutamos los tests de Gradle usando el XML configurado
+          ./gradlew test --stacktrace
 
       - name: Load Allure history
         uses: actions/checkout@v4
@@ -56,5 +60,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-history # Usamos la carpeta que genera la acción de Allure
+          publish_dir: allure-history
           publish_branch: gh-pages
