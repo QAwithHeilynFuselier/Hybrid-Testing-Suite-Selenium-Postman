@@ -9,7 +9,10 @@ jobs:
   ui-automation:
     runs-on: ubuntu-latest
 
-    # Levantamos el Grid dentro de GitHub para evitar el ConnectTimeoutException
+    permissions:
+      contents: write
+
+    # 1. INFRAESTRUCTURA PARA GITHUB: Crea el navegador en la nube
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
@@ -31,15 +34,45 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Run Selenium Tests
+    - name: Run Tests
+      env:
+        CHROME_HEADLESS: "true"
       run: |
-        # Usamos 'gradle' directamente ya que no usas el wrapper
-        # -DgridUrl sobreescribe tu IP local (10.0.0.43) por la del Grid de GitHub
-        gradle test -DCHROME_HEADLESS=true -DgridUrl=http://localhost:4444/wd/hub
+        # LÓGICA HÍBRIDA (Compatible con Jenkins y GitHub)
+        # Si no existe el wrapper, lo generamos (importante para Jenkins locales)
+        if [ ! -f "gradlew" ]; then
+          gradle wrapper
+        fi
+        chmod +x gradlew
+        
+        # EJECUCIÓN:
+        # -DgridUrl: En GitHub usamos localhost. 
+        # En tu Jenkins local, tú pasarás tu IP 10.0.0.43 manualmente en la config del Job.
+        ./gradlew test -DgridUrl=http://localhost:4444/wd/hub --stacktrace
 
-    - name: Upload Test Reports
-      if: always() 
-      uses: actions/upload-artifact@v4
+    - name: Load Allure history
+      uses: actions/checkout@v4
+      if: always()
+      continue-on-error: true
       with:
-        name: ui-test-results
-        path: "**/build/reports/tests/test/"
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Generate Allure Report
+      uses: simple-elf/allure-report-action@master
+      if: always()
+      id: allure-report
+      with:
+        allure_results: build/allure-results
+        gh_pages: gh-pages
+        allure_report: allure-report
+        allure_history: allure-history
+        keep_reports: 20
+
+    - name: Deploy to GitHub Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: allure-history
+        publish_branch: gh-pages
