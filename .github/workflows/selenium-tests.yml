@@ -39,16 +39,11 @@ jobs:
         CHROME_HEADLESS: "true"
       run: |
         # LÓGICA HÍBRIDA (Compatible con Jenkins y GitHub)
-        # Si no existe el wrapper, lo generamos (importante para Jenkins locales)
         if [ ! -f "gradlew" ]; then
           gradle wrapper
         fi
         chmod +x gradlew
-        
-        # EJECUCIÓN:
-        # -DgridUrl: En GitHub usamos localhost. 
-        # En tu Jenkins local, tú pasarás tu IP 10.0.0.43 manualmente en la config del Job.
-        ./gradlew test -DgridUrl=http://localhost:4444/wd/hub --stacktrace
+
 
     - name: Load Allure history
       uses: actions/checkout@v4
