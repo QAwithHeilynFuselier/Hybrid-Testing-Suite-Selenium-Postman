@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -30,51 +31,54 @@ public class BaseTest {
     @BeforeSuite
     @Parameters({"BaseUrl", "browser", "gridUrl"})
 
-
     public void setUp(String baseUrl,String browser, String gridUrl) {
         this.url = baseUrl;
         launchBrowser(baseUrl, browser, gridUrl);
 
     }
 
-    public void launchBrowser(String baseUrl, String browser,String gridUrl ) {
+    public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+        String systemGridUrl = System.getProperty("gridUrl");
+        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty())
+                ? systemGridUrl
+                : gridUrl;
 
-        this.url = baseUrl;
         ChromeOptions options = new ChromeOptions();
 
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
+        options.addArguments("--start-maximized");
 
-
-        if (System.getenv("CHROME_HEADLESS") != null || System.getProperty("CHROME_HEADLESS") != null) {
+        if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
             options.addArguments("--headless=new");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--window-size=1920,1080");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
-        } else {
-        options.addArguments("--start-maximized");
-    }
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+        }
+
         try {
-            driver = new RemoteWebDriver(new URL(gridUrl), options);
-
-
-            wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            actions = new Actions(driver);
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-
-            if (baseUrl != null) {
-                driver.get(baseUrl);
+            if (finalGridUrl != null && !finalGridUrl.contains("localhost")) {
+                System.out.println("MODO REMOTO: Conectando a " + finalGridUrl);
+                driver = new RemoteWebDriver(new URL(finalGridUrl), options);
+            } else {
+                System.out.println("MODO LOCAL: Iniciando Chrome...");
+                WebDriverManager.chromedriver().setup();
+                driver = new ChromeDriver(options);
             }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("error url grid: " + e.getMessage());
-        } catch (Exception e) {
 
-            throw new RuntimeException("no connect to selenium grid " + gridUrl, e);
+
+            this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            this.actions = new Actions(driver);
+
+
+            driver.get(baseUrl);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al conectar: " + e.getMessage());
         }
     }
+
     public void navigatetoPage() {
         driver.get(url);
     }
@@ -97,12 +101,10 @@ public class BaseTest {
     }
 
 
-
     @AfterMethod
 
     public void tearDown(ITestResult result) {
         if (ITestResult.FAILURE == result.getStatus()) {
-
 
             System.out.println(" El test '" + result.getName() + "' fail.");
             System.out.println(" allure no working with java version.");

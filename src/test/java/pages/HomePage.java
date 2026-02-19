@@ -41,19 +41,23 @@ public class HomePage  extends BasePage {
     @FindBy(xpath = "//*[contains(text(), 'updated')]")
     private WebElement successMessage;
 
+    private WebDriverWait wait;
+
     public HomePage(WebDriver givenDriver) {
         super(givenDriver);
+
+        this.wait = new WebDriverWait(givenDriver, Duration.ofSeconds(10));
         PageFactory.initElements(givenDriver, this);
     }
 
-    public boolean isAvatarVisible() {
+    public boolean isAvatarVisible2() {
         return findElement(userAvatarIcon).isDisplayed();
     }
     public void clickAvatar() {
         wait.until(ExpectedConditions.elementToBeClickable(userAvatarIcon)).click();
 
     }
-    public boolean isProfileVisible() {
+    public boolean isProfileVisible2() {
         return profileName.isDisplayed();
     }
 
@@ -64,7 +68,9 @@ public class HomePage  extends BasePage {
         js.executeScript("arguments[0].style.border='3px solid red'", logoutButton);
         logoutButton.click();
     }
-    public WebElement getLoginButton() {
+
+
+    public WebElement getLoginButton2() {
         return loginButton;
     }
 
@@ -72,13 +78,19 @@ public class HomePage  extends BasePage {
         return logoutButton.isDisplayed();
     }
 
-    public void highlightLogoutButton() {
+    public void highlightLogoutButton2() {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("arguments[0].style.border='3px solid red'", logoutButton);
         js.executeScript("arguments[0].style.backgroundColor='lavenderblush'", logoutButton);
     }
+    public void highlightLogoutButton() {
 
-    public void updateProfileInfo(String updateName, String updateEmail){
+        wait.until(ExpectedConditions.visibilityOf(logoutButton));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].style.border='3px solid red'", logoutButton);
+        js.executeScript("arguments[0].style.backgroundColor='lavenderblush'", logoutButton);
+    }
+    public void updateProfileInfo2(String updateName, String updateEmail){
 
 
         WebElement nameField = wait.until(ExpectedConditions.visibilityOf(profileNameInput));
@@ -92,14 +104,29 @@ public class HomePage  extends BasePage {
     }
 
 
-
+    public void updateProfileInfo(String updateName, String updateEmail){
+        wait.until(ExpectedConditions.visibilityOf(profileNameInput)).clear();
+        profileNameInput.sendKeys(updateName);
+        wait.until(ExpectedConditions.visibilityOf(profileEmailInput)).clear();
+        profileEmailInput.sendKeys(updateEmail);
+    }
     public void clickLogoutJS() {
-        WebElement btn = driver.findElement(By.cssSelector("[data-testid='btn-logout']"));
+
+        wait.until(ExpectedConditions.elementToBeClickable(logoutButton));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", logoutButton);
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.success")));
+    }
+
+    public void clickLogoutJSs() {
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+
+        WebElement btn = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("[data-testid='btn-logout']")));
+
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
 
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.success")));
-
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.success")));
     }
     public void updatePassword(String currentPass, String newPass){
         wait.until(ExpectedConditions.visibilityOf(currentPasswordInput));
@@ -124,7 +151,7 @@ public class HomePage  extends BasePage {
 
 
 
-    public boolean isSuccessToastDisplayed() {
+    public boolean isSuccessToastDisplayed1() {
         try {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
             wait.until(
@@ -137,8 +164,28 @@ public class HomePage  extends BasePage {
             return false;
         }
     }
+    public boolean isSuccessToastDisplayed() {
+        try {
 
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.success")));
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
 
+    public boolean isAvatarVisible() {
+        try {
+
+            return wait.until(ExpectedConditions.visibilityOf(userAvatarIcon)).isDisplayed();
+        } catch (TimeoutException e) {
+
+            return false;
+        }
+    }
+    public WebElement getLoginButton()
+    { return loginButton;
+    }
 
 
 

@@ -35,7 +35,7 @@ public class LoginTests extends BaseTest {
         AllsongsPage clickAllSongs = new AllsongsPage(driver);
         InfoPanelPage panelPage = new  InfoPanelPage(driver);
         CurrentQueuePage currentsong = new CurrentQueuePage(driver);
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    //WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
     loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
     wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("login")));
@@ -78,9 +78,9 @@ public class LoginTests extends BaseTest {
     public void loginwithcorrectPasswordTest() {
         LoginPage loginPage = new LoginPage(driver); // Page Factory init happens in the constructor
         HomePage homePage = loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
-        takeScreenshot("Login with correct password");
-        Assert.assertTrue(homePage.isAvatarVisible(), "Avatar no visible");
 
+        Assert.assertTrue(homePage.isAvatarVisible(), "Avatar no visible");
+        takeScreenshot("Login with correct password");
     }
 
 
@@ -128,6 +128,8 @@ public class LoginTests extends BaseTest {
     //INTERNSHIP-108260: User should be able to log out after updating credentials
 
    @Test(priority = 5, description = "User should be able to log out after successful login, User should be navigated to the Login page after logging out")
+
+
    public void logoutAfterUpdateTest() {
         LoginPage loginPage = new LoginPage(driver);
         HomePage homePage = new HomePage(driver);
