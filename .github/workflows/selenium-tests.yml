@@ -9,11 +9,18 @@ jobs:
   ui-automation:
     runs-on: ubuntu-latest
 
+    # Levantamos el Grid dentro de GitHub para que el RemoteWebDriver tenga a donde conectar
+    services:
+      selenium-grid:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-        ref: HeilynPracticeKoel # Forzamos a que use tu rama con código
+        ref: HeilynPracticeKoel
 
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -26,15 +33,14 @@ jobs:
 
     - name: Run Selenium Tests
       run: |
-        # En Gradle no usamos 'mvn test', usamos './gradlew test'
-        # Damos permisos de ejecución al wrapper
-        chmod +x gradlew
-        ./gradlew test -Dheadless=true
+        # Usamos 'gradle' directamente porque no usas el wrapper (gradlew)
+        # -DCHROME_HEADLESS=true activa tu lógica de ChromeOptions
+        # -DgridUrl apunta al servicio de Selenium Grid que levantamos arriba
+        gradle test -DCHROME_HEADLESS=true -DgridUrl=http://localhost:4444/wd/hub
 
     - name: Upload Test Reports
       if: always() 
       uses: actions/upload-artifact@v4
       with:
         name: ui-test-results
-        # Gradle guarda los reportes en build/reports/
         path: "**/build/reports/tests/test/"
