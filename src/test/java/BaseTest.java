@@ -33,7 +33,7 @@ public class BaseTest {
 
     public void setUp(String baseUrl,String browser, String gridUrl) {
         this.url = baseUrl;
-        launchBrowser(this.url, browser, gridUrl);
+        launchBrowser(baseUrl, browser, gridUrl);
 
     }
 
@@ -75,8 +75,6 @@ public class BaseTest {
             throw new RuntimeException("no connect to selenium grid " + gridUrl, e);
         }
     }
-
-
     public void navigatetoPage() {
         driver.get(url);
     }
