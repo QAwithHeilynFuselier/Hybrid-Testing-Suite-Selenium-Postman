@@ -44,7 +44,6 @@ public class BaseTest {
                 : gridUrl;
 
         ChromeOptions options = new ChromeOptions();
-
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
         options.addArguments("--start-maximized");
@@ -58,26 +57,27 @@ public class BaseTest {
         }
 
         try {
-            if (finalGridUrl != null && !finalGridUrl.contains("localhost")) {
-                System.out.println("MODO REMOTO: Conectando a " + finalGridUrl);
+
+            if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
+                System.out.println("DEBUG: Conectando a Selenium Grid en: [" + finalGridUrl + "]");
                 driver = new RemoteWebDriver(new URL(finalGridUrl), options);
             } else {
-                System.out.println("MODO LOCAL: Iniciando Chrome...");
+                System.out.println("MODO LOCAL: Iniciando ChromeDriver local...");
                 WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(options);
             }
 
-
             this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             this.actions = new Actions(driver);
-
-
             driver.get(baseUrl);
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al conectar: " + e.getMessage());
+
+            e.printStackTrace();
+            throw new RuntimeException("Error crítico en launchBrowser: " + e.getMessage());
         }
     }
+
 
     public void navigatetoPage() {
         driver.get(url);
