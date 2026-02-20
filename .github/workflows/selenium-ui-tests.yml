@@ -12,7 +12,6 @@ jobs:
     permissions:
       contents: write
 
-
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
