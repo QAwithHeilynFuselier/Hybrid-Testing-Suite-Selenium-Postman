@@ -13,11 +13,17 @@ jobs:
       contents: write
 
     services:
-      # Contenedor de Chrome Standalone que actúa como nuestro Grid
+      # Contenedor de Chrome Standalone con recursos optimizados
       selenium-grid:
         image: selenium/standalone-chrome:latest
         ports:
           - 4444:4444
+        options: >-
+          --shm-size=2g
+          --health-cmd "curl --fail http://localhost:4444/status || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
 
     steps:
       - name: Checkout Code
@@ -28,8 +34,9 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21' # Sincronizado con tu JDK 21 local para evitar errores de red
+          java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -38,24 +45,14 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA: Asegurar que el Grid esté listo antes de lanzar Gradle
-          echo "Esperando a que Selenium Grid esté listo en localhost:4444..."
-          timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
-          echo "¡Grid está encendido y listo!"
+          # 1. Espera activa mejorada
+          echo "Esperando a que Selenium Grid esté listo..."
+          timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 2; done'
+          echo "¡Grid listo para la acción!"
 
-          # 2. LOCALIZAR GRADLEW Y EJECUTAR
-          # Usamos localhost:4444 porque GitHub mapea los puertos de los services al host
-          GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
-          
-          if [ -z "$GRADLE_PATH" ]; then
-            echo "Usando gradle global..."
-            gradle test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --stacktrace
-          else
-            GRADLE_DIR=$(dirname "$GRADLE_PATH")
-            cd "$GRADLE_DIR"
-            chmod +x gradlew
-            ./gradlew test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --stacktrace
-          fi
+          # 2. Ejecución con parámetros del sistema
+          chmod +x gradlew
+          ./gradlew test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --info
 
       - name: Load Allure history
         uses: actions/checkout@v4
@@ -68,7 +65,6 @@ jobs:
       - name: Generate Allure Report
         uses: simple-elf/allure-report-action@master
         if: always()
-        id: allure-report
         with:
           allure_results: build/allure-results
           gh_pages: gh-pages
