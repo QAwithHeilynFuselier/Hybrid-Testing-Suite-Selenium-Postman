@@ -12,11 +12,10 @@ import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.*;
+
 import java.net.URL;
 import java.net.MalformedURLException;
-import org.testng.annotations.Parameters;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -32,74 +31,68 @@ public class BaseTest {
   protected WebDriver driver;
     protected WebDriverWait wait;
    protected Actions actions;
+    @BeforeMethod
+    @Parameters({"baseUrl", "browser", "gridUrl"})
+    public void setUp(
+            @Optional("https://qa.koel.app/") String baseUrl,
+            @Optional("chrome") String browser,
+            @Optional("") String gridUrl) {
 
-
-    @BeforeSuite
-    @Parameters({"BaseUrl", "browser", "gridUrl"})
-
-    public void setUp(String baseUrl,String browser, String gridUrl) {
-        this.url = baseUrl;
-        launchBrowser(baseUrl, browser, gridUrl);
-
+        this.url = baseUrl; // Guardamos la URL en la variable de la clase
+        launchBrowser(this.url, browser, gridUrl);
     }
 
     public void launchBrowser(String baseUrl, String browser, String gridUrl) {
-        String systemGridUrl = System.getProperty("gridUrl");
-        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty()) ? systemGridUrl : gridUrl;
+        // 1. Prioridad a variables de sistema (YAML), si no, usa TestNG
+        String finalGridUrl = System.getProperty("gridUrl", gridUrl);
+        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--disable-notifications");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--proxy-server='direct://'");
-        options.addArguments("--proxy-bypass-list=*");
-        options.addArguments("--blink-settings=imagesEnabled=false");
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--remote-allow-origins=*");
+        chromeOptions.addArguments("--disable-notifications");
+        chromeOptions.addArguments("--no-sandbox");
+        chromeOptions.addArguments("--disable-dev-shm-usage");
+        // Esto quita los errores de "Unable to find CDP implementation" en consola
+        chromeOptions.setCapability("browserVersion", "131");
 
-        if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
-            options.addArguments("--headless=new");
-            options.addArguments("--window-size=1920,1080");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--proxy-server='direct://'");
-            options.addArguments("--proxy-bypass-list=*");
-            options.addArguments("--blink-settings=imagesEnabled=false");
-        } else {
-            options.addArguments("--start-maximized");
+        if (headless || (finalGridUrl != null && !finalGridUrl.isEmpty())) {
+            chromeOptions.addArguments("--headless=new");
+            chromeOptions.addArguments("--disable-gpu");
         }
 
         try {
             if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
-                System.out.println("DEBUG: Conectando a Grid en: " + finalGridUrl);
-
-                // Configuración de paciencia para el Grid (3 minutos)
+                System.out.println("🚀 GRID MODE: " + finalGridUrl);
                 ClientConfig config = ClientConfig.defaultConfig()
-                        .readTimeout(Duration.ofMinutes(3))
-                        .connectionTimeout(Duration.ofMinutes(3));
+                        .connectionTimeout(Duration.ofMinutes(3))
+                        .readTimeout(Duration.ofMinutes(3));
 
                 driver = RemoteWebDriver.builder()
                         .address(new URL(finalGridUrl))
-                        .oneOf(options)
+                        .oneOf(chromeOptions)
                         .config(config)
                         .build();
-
-                System.out.println("INFO: Sesión remota iniciada.");
             } else {
-                System.out.println("MODO LOCAL: Iniciando ChromeDriver...");
-                driver = new ChromeDriver(options);
+                System.out.println("💻 LOCAL MODE");
+                // Usamos WebDriverManager para evitar que Chrome v145 rompa el test
+                io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
+                driver = new ChromeDriver(chromeOptions);
             }
 
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
             this.actions = new Actions(driver);
 
-            System.out.println("Navegando a: " + baseUrl);
             driver.get(baseUrl);
 
         } catch (Exception e) {
-            System.err.println("❌ ERROR: " + e.getMessage());
-            throw new RuntimeException("Fallo al inicializar el driver: " + e.getMessage(), e);
+            System.err.println("❌ Fallo en el Driver: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
+
+
+
 
 
 
@@ -124,7 +117,6 @@ public class BaseTest {
     public byte[] saveScreenshot(WebDriver driver) {
         return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
     }
-
 
     @AfterMethod
 

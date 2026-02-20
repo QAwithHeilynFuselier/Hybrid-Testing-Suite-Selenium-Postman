@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 
-<suite name="Suite Optimizada" parallel="none">
-    <parameter name="gridUrl" value="" />
-    <parameter name="browser" value="chrome" />
-    <parameter name="BaseUrl" value="https://qa.koel.app/"/>
+<suite name="Suite UI Automation"
+       parallel="false"
+       thread-count="1"
+       verbose="1"
+       configfailurepolicy="continue">
 
+    <parameter name="baseUrl" value="https://qa.koel.app/"/>
+    <parameter name="browser" value="chrome"/>
+    <parameter name="gridUrl" value=""/>
+
+    <!-- Allure Listener -->
     <listeners>
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
 
-    <test name="Java Selenium test case" preserve-order="true">
+    <test name="Login Tests" preserve-order="true">
         <classes>
             <class name="LoginTests"/>
         </classes>
     </test>
+
 </suite>
