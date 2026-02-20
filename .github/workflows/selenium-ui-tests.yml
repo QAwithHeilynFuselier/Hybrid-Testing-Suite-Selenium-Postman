@@ -18,7 +18,7 @@ jobs:
           - 4444:4444
         options: >-
           --shm-size=2g
-          --health-cmd "curl --fail http://localhost:4444/status || exit 1"
+          --health-cmd "curl --fail http://127.0.0.1:4444/status || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 3
@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "Esperando a que Selenium Grid esté listo..."
           # Espera hasta que el Grid reporte que está listo
-          timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 2; done'
+          timeout 60s bash -c 'until curl -s http://127.0.0.1:4444/status | grep -q "\"ready\": true"; do sleep 2; done'
           echo "¡Grid listo para la acción!"
           
           # Localizar gradlew y darle permisos
@@ -53,7 +53,7 @@ jobs:
           chmod +x "$GRADLE_PATH"
           
           # Ejecución de tests con URL limpia y parámetros de sistema
-          "$GRADLE_PATH" test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --info
+          "$GRADLE_PATH" test -DgridUrl=http://127.0.0.1:4444 -DCHROME_HEADLESS=true --info
 
       - name: Load Allure history
         uses: actions/checkout@v4
