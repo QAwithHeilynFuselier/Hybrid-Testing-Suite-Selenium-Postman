@@ -13,6 +13,7 @@ jobs:
       contents: write
 
     services:
+      # Este es el nombre del "host" que usaremos: selenium-grid
       selenium-grid:
         image: selenium/standalone-chrome:latest
         ports:
@@ -37,21 +38,20 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA
+          # 1. ESPERA ACTIVA: Verificamos que el puerto responda
           echo "Esperando a que Selenium Grid esté listo..."
           timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
-          # 2. ENCONTRAR Y EJECUTAR GRADLEW AUTOMÁTICAMENTE
-          # CAMBIO CLAVE: Usamos -DgridUrl=http://selenium-grid:4444
+          # 2. EJECUCIÓN: Usamos el nombre del servicio 'selenium-grid'
           GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
           
           if [ -z "$GRADLE_PATH" ]; then
-            echo "No se encontró gradlew en carpetas, usando gradle global..."
+            echo "Usando gradle global..."
+            # CAMBIO CLAVE: selenium-grid en lugar de localhost
             gradle test -DgridUrl=http://selenium-grid:4444 --stacktrace
           else
             GRADLE_DIR=$(dirname "$GRADLE_PATH")
-            echo "Archivo gradlew encontrado en: $GRADLE_DIR"
             cd "$GRADLE_DIR"
             chmod +x gradlew
             ./gradlew test -DgridUrl=http://selenium-grid:4444 --stacktrace
