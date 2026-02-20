@@ -38,31 +38,40 @@ public class BaseTest {
             @Optional("chrome") String browser,
             @Optional("") String gridUrl) {
 
-        this.url = baseUrl; // Guardamos la URL en la variable de la clase
+        this.url = baseUrl;
         launchBrowser(this.url, browser, gridUrl);
     }
 
     public void launchBrowser(String baseUrl, String browser, String gridUrl) {
-        // 1. Prioridad a variables de sistema (YAML), si no, usa TestNG
+        // 1. Prioridad a Propiedades del Sistema (GitHub), luego a parámetros (testng.xml), luego default
+        String finalBaseUrl = System.getProperty("baseUrl", baseUrl);
+        if (finalBaseUrl == null || finalBaseUrl.isEmpty()) {
+            finalBaseUrl = "https://bbb.testpro.io/"; // URL de respaldo
+        }
+
         String finalGridUrl = System.getProperty("gridUrl", gridUrl);
         boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
 
+        // 2. Configuración de Chrome con los argumentos necesarios para entornos CI (GitHub)
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--remote-allow-origins=*");
         chromeOptions.addArguments("--disable-notifications");
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-dev-shm-usage");
-        // Esto quita los errores de "Unable to find CDP implementation" en consola
         chromeOptions.setCapability("browserVersion", "131");
 
+        // Activar Headless si estamos en el Grid o si se pide explícitamente
         if (headless || (finalGridUrl != null && !finalGridUrl.isEmpty())) {
             chromeOptions.addArguments("--headless=new");
             chromeOptions.addArguments("--disable-gpu");
+            chromeOptions.addArguments("--window-size=1920,1080"); // Recomendado para Headless
         }
 
         try {
             if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
-                System.out.println("🚀 GRID MODE: " + finalGridUrl);
+                System.out.println("🚀 GRID MODE: Conectando a " + finalGridUrl);
+
+                // Configuración de Timeouts para evitar el Error 500 en el handshake inicial
                 ClientConfig config = ClientConfig.defaultConfig()
                         .connectionTimeout(Duration.ofMinutes(3))
                         .readTimeout(Duration.ofMinutes(3));
@@ -74,27 +83,23 @@ public class BaseTest {
                         .build();
             } else {
                 System.out.println("💻 LOCAL MODE");
-                // Usamos WebDriverManager para evitar que Chrome v145 rompa el test
                 io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(chromeOptions);
             }
 
+            // 3. Inicialización de esperas y navegación
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
             this.actions = new Actions(driver);
 
-            driver.get(baseUrl);
+            System.out.println("🌍 Navegando a: " + finalBaseUrl);
+            driver.get(finalBaseUrl);
 
         } catch (Exception e) {
-            System.err.println("❌ Fallo en el Driver: " + e.getMessage());
+            System.err.println("❌ Fallo crítico en el Driver: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
-
-
-
-
-
 
 
     public void navigatetoPage() {
