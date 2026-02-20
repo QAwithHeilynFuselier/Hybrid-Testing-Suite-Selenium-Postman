@@ -11,11 +11,13 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.testng:testng:7.8.0'
+
     implementation 'org.seleniumhq.selenium:selenium-java:4.28.1'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:6.0.1'
-    testImplementation 'io.qameta.allure:allure-testng:2.25.0'
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
+    testImplementation 'org.testng:testng:7.10.2'
+    testImplementation 'io.qameta.allure:allure-testng:2.29.1'
+
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
 }
 
 allure {
