@@ -1,4 +1,4 @@
-nname: UI Testing Execution
+name: UI Testing Execution
 
 on:
   push:
