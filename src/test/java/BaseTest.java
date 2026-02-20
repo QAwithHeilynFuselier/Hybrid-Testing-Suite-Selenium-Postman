@@ -8,6 +8,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
@@ -37,7 +38,7 @@ public class BaseTest {
 
     }
 
-    public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+    public void launchBrowser1(String baseUrl, String browser, String gridUrl) {
         String systemGridUrl = System.getProperty("gridUrl");
         String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty())
                 ? systemGridUrl
@@ -78,7 +79,52 @@ public class BaseTest {
         }
     }
 
+    public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+        String systemGridUrl = System.getProperty("gridUrl");
+        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty())
+                ? systemGridUrl
+                : gridUrl;
 
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--disable-notifications");
+        options.addArguments("--start-maximized");
+
+
+        options.setCapability("se:cdpEnabled", false);
+
+        if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+            options.setCapability("se:cdpEnabled", false);
+        }
+
+        try {
+            if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
+                System.out.println("DEBUG: Conectando a Selenium Grid en: [" + finalGridUrl + "]");
+
+                // Forma directa y estable para Selenium 4.5.0
+                driver = new RemoteWebDriver(new URL(finalGridUrl), options);
+
+                System.out.println("INFO: Sesión creada exitosamente.");
+            } else {
+                System.out.println("MODO LOCAL: Iniciando ChromeDriver local...");
+                WebDriverManager.chromedriver().setup();
+                driver = new ChromeDriver(options);
+            }
+
+            this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            this.actions = new Actions(driver);
+            driver.get(baseUrl);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error crítico en launchBrowser: " + e.getMessage());
+        }
+    }
     public void navigatetoPage() {
         driver.get(url);
     }

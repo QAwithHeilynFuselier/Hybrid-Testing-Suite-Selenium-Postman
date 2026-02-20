@@ -17,11 +17,13 @@ import java.time.Duration;
 
 
 public class LoginTests extends BaseTest {
+
    @BeforeMethod
    @Parameters({"BaseUrl", "browser", "gridUrl"})
 
     public void setup(String BaseUrl, String browser, String gridUrl) {
        launchBrowser(BaseUrl, browser, gridUrl);
+       LoginPage loginPage = new LoginPage(driver);
        navigatetoPage();
 
    }
