@@ -8,6 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     services:
       selenium:
@@ -44,7 +45,11 @@ jobs:
           echo "Selenium Grid listo!"
 
       - name: Run tests
-        run: ./gradlew clean test --info
+        run: |
+          ./gradlew clean test \
+          -DgridUrl=http://localhost:4444 \
+          -Dheadless=true \
+          --info
 
       - name: Upload Allure Results
         if: always()
