@@ -1,4 +1,4 @@
-name: UI Testing Execution
+nname: UI Testing Execution
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: write
 
-    # 🐳 Levantamos el navegador Chrome en el servidor de GitHub
+
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
@@ -43,9 +43,19 @@ jobs:
           timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
-          # 2. EJECUCIÓN: Forzamos la URL de localhost para que conecte con Docker
-          chmod +x gradlew
-          ./gradlew test -DgridUrl=http://localhost:4444 --stacktrace
+          # 2. ENCONTRAR Y EJECUTAR GRADLEW AUTOMÁTICAMENTE
+          GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
+          
+          if [ -z "$GRADLE_PATH" ]; then
+            echo "No se encontró gradlew en carpetas, usando gradle global..."
+            gradle test -DgridUrl=http://localhost:4444 --stacktrace
+          else
+            GRADLE_DIR=$(dirname "$GRADLE_PATH")
+            echo "Archivo gradlew encontrado en: $GRADLE_DIR"
+            cd "$GRADLE_DIR"
+            chmod +x gradlew
+            ./gradlew test -DgridUrl=http://localhost:4444 --stacktrace
+          fi
 
       - name: Load Allure history
         uses: actions/checkout@v4
