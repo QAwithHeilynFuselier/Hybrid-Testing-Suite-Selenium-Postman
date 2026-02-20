@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Duration;
 import org.openqa.selenium.remote.http.ClientConfig;
+import org.openqa.selenium.remote.http.ClientConfig;
+import java.net.URL;
+import java.time.Duration;
 
 public class BaseTest {
 
@@ -41,13 +44,10 @@ public class BaseTest {
     }
 
     public void launchBrowser(String baseUrl, String browser, String gridUrl) {
-        // 1. Obtener URL del Grid (Prioridad GitHub Actions)
         String systemGridUrl = System.getProperty("gridUrl");
         String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty()) ? systemGridUrl : gridUrl;
 
         ChromeOptions options = new ChromeOptions();
-
-        // Configuración esencial para estabilidad en Docker
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
@@ -63,40 +63,34 @@ public class BaseTest {
 
         try {
             if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
-                System.out.println("DEBUG: Conectando a Selenium Grid en: " + finalGridUrl);
+                System.out.println("DEBUG: Conectando a Grid en: " + finalGridUrl);
 
-                // --- SOLUCIÓN AL TIMEOUT (LÍNEA 211) ---
-                // Creamos una configuración de cliente con más tiempo de espera (3 minutos)
-                // Esto evita el java.util.concurrent.TimeoutException que viste en el log
-                org.openqa.selenium.remote.http.ClientConfig config =
-                        org.openqa.selenium.remote.http.ClientConfig.defaultConfig()
-                                .readTimeout(Duration.ofMinutes(3))
-                                .connectionTimeout(Duration.ofMinutes(3));
+                // Configuración de paciencia para el Grid (3 minutos)
+                ClientConfig config = ClientConfig.defaultConfig()
+                        .readTimeout(Duration.ofMinutes(3))
+                        .connectionTimeout(Duration.ofMinutes(3));
 
-                // Usamos el Builder para pasarle la URL, las opciones y la nueva configuración
                 driver = RemoteWebDriver.builder()
                         .address(new URL(finalGridUrl))
                         .oneOf(options)
                         .config(config)
                         .build();
 
-                System.out.println("INFO: Sesión remota iniciada exitosamente.");
+                System.out.println("INFO: Sesión remota iniciada.");
             } else {
                 System.out.println("MODO LOCAL: Iniciando ChromeDriver...");
                 driver = new ChromeDriver(options);
             }
 
-            // Timeouts de interacción
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            this.wait = new WebDriverWait(driver, Duration.ofSeconds(20)); // Más margen para el Grid
+            this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
             this.actions = new Actions(driver);
 
             System.out.println("Navegando a: " + baseUrl);
             driver.get(baseUrl);
 
         } catch (Exception e) {
-            System.err.println("❌ ERROR CRÍTICO EN LAUNCHBROWSER: " + e.getMessage());
-            // El "trick" aquí es lanzar el error con 'e' al final para ver la causa raíz
+            System.err.println("❌ ERROR: " + e.getMessage());
             throw new RuntimeException("Fallo al inicializar el driver: " + e.getMessage(), e);
         }
     }
