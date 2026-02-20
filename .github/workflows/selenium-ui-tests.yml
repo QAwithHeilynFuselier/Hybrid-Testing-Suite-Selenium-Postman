@@ -37,23 +37,24 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA: Verificamos que el puerto 4444 esté listo
+          # 1. ESPERA ACTIVA
           echo "Esperando a que Selenium Grid esté listo..."
           timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
           # 2. ENCONTRAR Y EJECUTAR GRADLEW AUTOMÁTICAMENTE
+          # CAMBIO CLAVE: Usamos -DgridUrl=http://selenium-grid:4444
           GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
           
           if [ -z "$GRADLE_PATH" ]; then
             echo "No se encontró gradlew en carpetas, usando gradle global..."
-            gradle test -DgridUrl=http://localhost:4444 --stacktrace
+            gradle test -DgridUrl=http://selenium-grid:4444 --stacktrace
           else
             GRADLE_DIR=$(dirname "$GRADLE_PATH")
             echo "Archivo gradlew encontrado en: $GRADLE_DIR"
             cd "$GRADLE_DIR"
             chmod +x gradlew
-            ./gradlew test -DgridUrl=http://localhost:4444 --stacktrace
+            ./gradlew test -DgridUrl=http://selenium-grid:4444 --stacktrace
           fi
 
       - name: Load Allure history
