@@ -1,0 +1,87 @@
+name: UI Testing Execution
+
+on:
+  push:
+    branches: [ "HeilynPracticeKoel" ]
+  workflow_dispatch: 
+
+jobs:
+  ui-automation:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    services:
+      # Este es el contenedor que actuará como nuestro navegador remoto
+      selenium-grid:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: HeilynPracticeKoel
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run Tests
+        env:
+          # Variable de entorno para el SO, aunque la pasaremos por -D para mayor seguridad
+          CHROME_HEADLESS: "true"
+        run: |
+          # 1. ESPERA ACTIVA: Verificamos que el Grid responda internamente antes de iniciar
+          echo "Esperando a que Selenium Grid esté listo..."
+          timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
+          echo "¡Grid está encendido y listo!"
+
+          # 2. LOCALIZAR GRADLEW Y EJECUTAR
+          GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
+          
+          if [ -z "$GRADLE_PATH" ]; then
+            echo "Usando gradle global..."
+            # Agregamos -DCHROME_HEADLESS=true para que coincida con tu lógica de BaseTest
+            gradle test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
+          else
+            GRADLE_DIR=$(dirname "$GRADLE_PATH")
+            cd "$GRADLE_DIR"
+            chmod +x gradlew
+            # Ejecución pasando las propiedades del sistema necesarias para el puente con Java
+            ./gradlew test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
+          fi
+
+      - name: Load Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+          publish_branch: gh-pages
