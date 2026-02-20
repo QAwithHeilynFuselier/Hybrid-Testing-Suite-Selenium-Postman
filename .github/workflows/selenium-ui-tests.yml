@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     services:
-      # Este es el nombre del "host" que usaremos: selenium-grid
+      # Este es el contenedor que actuará como nuestro navegador remoto
       selenium-grid:
         image: selenium/standalone-chrome:latest
         ports:
@@ -36,25 +36,27 @@ jobs:
 
       - name: Run Tests
         env:
+          # Variable de entorno para el SO, aunque la pasaremos por -D para mayor seguridad
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA: Verificamos que el puerto responda
+          # 1. ESPERA ACTIVA: Verificamos que el Grid responda internamente antes de iniciar
           echo "Esperando a que Selenium Grid esté listo..."
           timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
-          # 2. EJECUCIÓN: Usamos el nombre del servicio 'selenium-grid'
+          # 2. LOCALIZAR GRADLEW Y EJECUTAR
           GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
           
           if [ -z "$GRADLE_PATH" ]; then
             echo "Usando gradle global..."
-            # CAMBIO CLAVE: selenium-grid en lugar de localhost
-            gradle test -DgridUrl=http://selenium-grid:4444 --stacktrace
+            # Agregamos -DCHROME_HEADLESS=true para que coincida con tu lógica de BaseTest
+            gradle test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
           else
             GRADLE_DIR=$(dirname "$GRADLE_PATH")
             cd "$GRADLE_DIR"
             chmod +x gradlew
-            ./gradlew test -DgridUrl=http://selenium-grid:4444 --stacktrace
+            # Ejecución pasando las propiedades del sistema necesarias para el puente con Java
+            ./gradlew test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
           fi
 
       - name: Load Allure history
