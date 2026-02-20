@@ -1,0 +1,1 @@
+{"uuid":"8219eb68-65f1-45f0-bf42-5d34d8647eff","name":"Suite Optimizada","children":["5961c644-de98-49ba-845d-309553b590f7"],"befores":[{"name":"setUp","status":"passed","stage":"finished","description":"","steps":[],"attachments":[],"parameters":[],"start":1771604565227,"stop":1771604569074}],"afters":[],"start":1771604565201,"stop":1771604625165}
