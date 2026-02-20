@@ -43,38 +43,32 @@ public class BaseTest {
     }
 
     public void launchBrowser(String baseUrl, String browser, String gridUrl) {
-        // 1. Prioridad a Propiedades del Sistema (GitHub), luego a parámetros (testng.xml), luego default
-        String finalBaseUrl = System.getProperty("baseUrl", baseUrl);
+        // 1. LIMPIEZA DE DATOS (Evita que se caiga por valores null)
+        String finalBaseUrl = (System.getProperty("baseUrl") != null) ? System.getProperty("baseUrl") : baseUrl;
         if (finalBaseUrl == null || finalBaseUrl.isEmpty()) {
-            finalBaseUrl = "https://bbb.testpro.io/"; // URL de respaldo
+            finalBaseUrl = "https://qa.koel.app/"; // Valor de respaldo absoluto
         }
 
-        String finalGridUrl = System.getProperty("gridUrl", gridUrl);
-        boolean headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
+        String finalGridUrl = (System.getProperty("gridUrl") != null) ? System.getProperty("gridUrl") : gridUrl;
 
-        // 2. Configuración de Chrome con los argumentos necesarios para entornos CI (GitHub)
+        // 2. CONFIGURACIÓN DE OPCIONES
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--remote-allow-origins=*");
-        chromeOptions.addArguments("--disable-notifications");
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-dev-shm-usage");
-        chromeOptions.setCapability("browserVersion", "131");
 
-        // Activar Headless si estamos en el Grid o si se pide explícitamente
-        if (headless || (finalGridUrl != null && !finalGridUrl.isEmpty())) {
-            chromeOptions.addArguments("--headless=new");
-            chromeOptions.addArguments("--disable-gpu");
-            chromeOptions.addArguments("--window-size=1920,1080"); // Recomendado para Headless
-        }
+        // Forzamos Headless en GitHub Actions para estabilidad
+        chromeOptions.addArguments("--headless=new");
 
         try {
-            if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
-                System.out.println("🚀 GRID MODE: Conectando a " + finalGridUrl);
+            // 3. DECISIÓN INTELIGENTE (Aquí es donde evitamos que se caiga)
+            // Si gridUrl es null, vacío o es localhost, saltamos al modo LOCAL
+            if (finalGridUrl != null && !finalGridUrl.isEmpty() && !finalGridUrl.contains("localhost")) {
+                System.out.println("🚀 Intentando GRID en: " + finalGridUrl);
 
-                // Configuración de Timeouts para evitar el Error 500 en el handshake inicial
                 ClientConfig config = ClientConfig.defaultConfig()
-                        .connectionTimeout(Duration.ofMinutes(3))
-                        .readTimeout(Duration.ofMinutes(3));
+                        .connectionTimeout(Duration.ofMinutes(2))
+                        .readTimeout(Duration.ofMinutes(2));
 
                 driver = RemoteWebDriver.builder()
                         .address(new URL(finalGridUrl))
@@ -82,24 +76,27 @@ public class BaseTest {
                         .config(config)
                         .build();
             } else {
-                System.out.println("💻 LOCAL MODE");
-                io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
+                System.out.println("💻 Modo LOCAL detectado (o localhost ignorado)");
+                WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(chromeOptions);
             }
 
-            // 3. Inicialización de esperas y navegación
+            // 4. FINALIZACIÓN
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-            this.actions = new Actions(driver);
-
-            System.out.println("🌍 Navegando a: " + finalBaseUrl);
             driver.get(finalBaseUrl);
 
         } catch (Exception e) {
-            System.err.println("❌ Fallo crítico en el Driver: " + e.getMessage());
-            throw new RuntimeException(e);
+            System.err.println("❌ ERROR CRÍTICO en launchBrowser: " + e.getMessage());
+            // Si falla el Grid por cualquier razón, intentamos un último respaldo local
+            WebDriverManager.chromedriver().setup();
+            driver = new ChromeDriver(chromeOptions);
+            driver.get(finalBaseUrl);
         }
     }
+
+
+
 
     public void navigatetoPage() {
         driver.get(url);
