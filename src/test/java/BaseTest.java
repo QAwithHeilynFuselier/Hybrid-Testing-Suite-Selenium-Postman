@@ -52,11 +52,17 @@ public class BaseTest {
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--proxy-server='direct://'");
+        options.addArguments("--proxy-bypass-list=*");
+        options.addArguments("--blink-settings=imagesEnabled=false");
 
         if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1920,1080");
             options.addArguments("--disable-gpu");
+            options.addArguments("--proxy-server='direct://'");
+            options.addArguments("--proxy-bypass-list=*");
+            options.addArguments("--blink-settings=imagesEnabled=false");
         } else {
             options.addArguments("--start-maximized");
         }
