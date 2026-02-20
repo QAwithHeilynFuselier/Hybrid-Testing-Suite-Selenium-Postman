@@ -59,7 +59,7 @@ public class BaseTest {
 
         try {
             if (finalGridUrl != null && !finalGridUrl.contains("localhost")) {
-                System.out.println("MODO REMOTO: Conectando a " + finalGridUrl);
+                System.out.println("DEBUG: Intentando conectar a la URL: [" + finalGridUrl + "]");
                 driver = new RemoteWebDriver(new URL(finalGridUrl), options);
             } else {
                 System.out.println("MODO LOCAL: Iniciando Chrome...");
