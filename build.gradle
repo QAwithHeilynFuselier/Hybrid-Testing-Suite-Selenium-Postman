@@ -29,12 +29,15 @@ allure {
         }
     }
 }
-
 test {
     useTestNG() {
+        // Verifica que la ruta al XML sea exacta (mayúsculas/minúsculas)
         suites "src/test/resources/TestNG.xml"
     }
+    // Mapeo de variables de entorno a Propiedades del Sistema de Java
     systemProperty "allure.results.directory", "build/allure-results"
+    systemProperty "baseUrl", System.getProperty("baseUrl") // <--- AGREGA ESTA LÍNEA
     systemProperty "gridUrl", System.getProperty("gridUrl")
-    systemProperty "CHROME_HEADLESS", System.getProperty("CHROME_HEADLESS")
+    systemProperty "browser", System.getProperty("browser")
+    systemProperty "headless", System.getProperty("headless")
 }
