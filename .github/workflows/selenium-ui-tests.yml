@@ -13,7 +13,7 @@ jobs:
       contents: write
 
     services:
-      # Este es el contenedor que actuará como nuestro navegador remoto
+      # Contenedor de Chrome Standalone que actúa como nuestro Grid
       selenium-grid:
         image: selenium/standalone-chrome:latest
         ports:
@@ -28,7 +28,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21' # Actualizado a Java 21 para coincidir con tu configuración exitosa
+          java-version: '21' # Sincronizado con tu JDK 21 local para evitar errores de red
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -38,12 +38,13 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA: Verificamos que el Grid responda internamente antes de iniciar
-          echo "Esperando a que Selenium Grid esté listo..."
+          # 1. ESPERA ACTIVA: Asegurar que el Grid esté listo antes de lanzar Gradle
+          echo "Esperando a que Selenium Grid esté listo en localhost:4444..."
           timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
           # 2. LOCALIZAR GRADLEW Y EJECUTAR
+          # Usamos localhost:4444 porque GitHub mapea los puertos de los services al host
           GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
           
           if [ -z "$GRADLE_PATH" ]; then
@@ -53,7 +54,6 @@ jobs:
             GRADLE_DIR=$(dirname "$GRADLE_PATH")
             cd "$GRADLE_DIR"
             chmod +x gradlew
-            # Nota: Usamos localhost:4444 porque el servicio está mapeado al host de la Runner
             ./gradlew test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --stacktrace
           fi
 
@@ -78,8 +78,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-history
-          publish_branch: gh-pages
+        uses: peaceiris/actions-gh-pages@
