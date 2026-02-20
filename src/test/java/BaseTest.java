@@ -124,7 +124,7 @@ public class BaseTest {
     }
 
 
-    public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+    public void launchBrowserww(String baseUrl, String browser, String gridUrl) {
         // 1. Prioridad: Si GitHub Actions envía la URL por comando (-DgridUrl), la usamos.
         String systemGridUrl = System.getProperty("gridUrl");
 
@@ -180,7 +180,55 @@ public class BaseTest {
         }
     }
 
+    public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+        // 1. Prioridad: Propiedad de sistema (GitHub Actions), luego parámetro manual, si no, vacío.
+        String systemGridUrl = System.getProperty("gridUrl");
+        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty()) ? systemGridUrl : gridUrl;
 
+        ChromeOptions options = new ChromeOptions();
+
+        // Configuración de estabilidad para Docker/Linux
+        options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--disable-notifications");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+
+        // 2. Manejo de Headless
+        if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
+            options.addArguments("--headless=new");
+            options.addArguments("--window-size=1920,1080");
+        } else {
+            options.addArguments("--start-maximized");
+        }
+
+        try {
+            if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
+                System.out.println("DEBUG: Conectando a Selenium Grid: " + finalGridUrl);
+
+                // IMPORTANTE: En Selenium 4.28.1 + Java 21, no necesitas forzar "jdk-http-client"
+                // ya que es el estándar por defecto. Solo asegúrate de manejar el URL correctamente.
+
+                driver = new RemoteWebDriver(new URL(finalGridUrl), options);
+                System.out.println("INFO: Sesión remota iniciada.");
+            } else {
+                System.out.println("MODO LOCAL: Iniciando ChromeDriver...");
+                // Usando el Selenium Manager interno de Selenium 4.28+ (ya no necesitas WebDriverManager obligatoriamente)
+                driver = new ChromeDriver(options);
+            }
+
+            // 3. Timeouts robustos
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            this.wait = new WebDriverWait(driver, Duration.ofSeconds(15)); // Un poco más de margen para el Grid
+            this.actions = new Actions(driver);
+
+            System.out.println("Navegando a: " + baseUrl);
+            driver.get(baseUrl);
+
+        } catch (Exception e) {
+            System.err.println("❌ ERROR EN LAUNCHBROWSER: " + e.getMessage());
+            throw new RuntimeException("Fallo al inicializar el driver: " + e.getMessage(), e);
+        }
+    }
 
 
 
