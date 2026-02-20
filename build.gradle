@@ -33,7 +33,6 @@ test {
     useTestNG() {
         suites "src/test/resources/TestNG.xml"
     }
-
     systemProperty "allure.results.directory", "build/allure-results"
     systemProperty "gridUrl", System.getProperty("gridUrl")
     systemProperty "CHROME_HEADLESS", System.getProperty("CHROME_HEADLESS")
