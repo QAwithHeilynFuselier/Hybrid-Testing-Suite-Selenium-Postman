@@ -28,7 +28,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21' # Actualizado a Java 21 para coincidir con tu configuración exitosa
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -36,12 +36,11 @@ jobs:
 
       - name: Run Tests
         env:
-          # Variable de entorno para el SO, aunque la pasaremos por -D para mayor seguridad
           CHROME_HEADLESS: "true"
         run: |
           # 1. ESPERA ACTIVA: Verificamos que el Grid responda internamente antes de iniciar
           echo "Esperando a que Selenium Grid esté listo..."
-          timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
+          timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
           echo "¡Grid está encendido y listo!"
 
           # 2. LOCALIZAR GRADLEW Y EJECUTAR
@@ -49,14 +48,13 @@ jobs:
           
           if [ -z "$GRADLE_PATH" ]; then
             echo "Usando gradle global..."
-            # Agregamos -DCHROME_HEADLESS=true para que coincida con tu lógica de BaseTest
-            gradle test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
+            gradle test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --stacktrace
           else
             GRADLE_DIR=$(dirname "$GRADLE_PATH")
             cd "$GRADLE_DIR"
             chmod +x gradlew
-            # Ejecución pasando las propiedades del sistema necesarias para el puente con Java
-            ./gradlew test -DgridUrl=http://selenium-grid:4444 -DCHROME_HEADLESS=true --stacktrace
+            # Nota: Usamos localhost:4444 porque el servicio está mapeado al host de la Runner
+            ./gradlew test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --stacktrace
           fi
 
       - name: Load Allure history
