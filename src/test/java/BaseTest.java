@@ -125,39 +125,42 @@ public class BaseTest {
 
 
     public void launchBrowser(String baseUrl, String browser, String gridUrl) {
+        // 1. Prioridad: Si GitHub Actions envía la URL por comando (-DgridUrl), la usamos.
         String systemGridUrl = System.getProperty("gridUrl");
-        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty())
-                ? systemGridUrl
-                : gridUrl;
+
+        // 2. Lógica inteligente: Si no hay propiedad de sistema Y no hay gridUrl manual, es Local.
+        String finalGridUrl = (systemGridUrl != null && !systemGridUrl.isEmpty()) ? systemGridUrl : gridUrl;
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-notifications");
-        options.addArguments("--start-maximized");
-// Añade estas dos líneas para máxima compatibilidad con Docker:
+
+        // Configuración para entornos Docker/Nube
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
 
-        options.setCapability("se:cdpEnabled", false);
-
+        // 3. Manejo de Headless (Obligatorio para GitHub Actions)
         if ("true".equals(System.getProperty("CHROME_HEADLESS"))) {
             options.addArguments("--headless=new");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--disable-gpu");
             options.addArguments("--window-size=1920,1080");
+        } else {
+            options.addArguments("--start-maximized");
         }
 
         try {
+            // 4. Verificación de conexión: ¿Realmente queremos usar un Grid?
             if (finalGridUrl != null && !finalGridUrl.isEmpty()) {
-                System.out.println("DEBUG: Intentando conexión a: " + finalGridUrl);
+                System.out.println("DEBUG: Intentando conexión al Grid en: " + finalGridUrl);
 
-
+                // Usar el cliente JDK para evitar Timeouts en Java 21
                 System.setProperty("webdriver.http.factory", "jdk-http-client");
 
+                // TIP: Agregamos un timeout a la creación de la sesión para que no se congele
                 driver = new RemoteWebDriver(new URL(finalGridUrl), options);
                 System.out.println("INFO: Sesión creada exitosamente en el Grid.");
             } else {
+                // 5. MODO LOCAL: Si falló lo anterior, abrimos el Chrome de tu PC
                 System.out.println("MODO LOCAL: Iniciando ChromeDriver...");
                 WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver(options);
@@ -172,9 +175,17 @@ public class BaseTest {
 
         } catch (Exception e) {
             System.err.println("CAUSA DEL FALLO: " + e.getMessage());
+            // Importante para ver el error real en la consola de IntelliJ
             throw new RuntimeException("Error crítico en launchBrowser: " + e.getMessage(), e);
         }
     }
+
+
+
+
+
+
+
 
     public void navigatetoPage() {
         driver.get(url);
