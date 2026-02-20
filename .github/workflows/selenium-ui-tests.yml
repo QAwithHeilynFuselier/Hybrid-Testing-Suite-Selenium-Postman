@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: write
 
+    # 🐳 Levantamos el navegador Chrome en el servidor de GitHub
     services:
       selenium-grid:
         image: selenium/standalone-chrome:latest
@@ -37,14 +38,14 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. ESPERA ACTIVA: GitHub espera a que el Grid responda "ready"
+          # 1. ESPERA ACTIVA: Verificamos que el puerto 4444 esté listo
           echo "Esperando a que Selenium Grid esté listo..."
           timeout 30s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 1; done'
-          echo "Grid está UP!"
+          echo "¡Grid está encendido y listo!"
 
-          # 2. EJECUCIÓN: Usamos 'gradle' y la URL limpia (sin /wd/hub)
-          # Esto sobreescribe tu IP 10.0.0.43 solo durante este paso.
-          gradle test -DgridUrl=http://localhost:4444 --stacktrace
+          # 2. EJECUCIÓN: Forzamos la URL de localhost para que conecte con Docker
+          chmod +x gradlew
+          ./gradlew test -DgridUrl=http://localhost:4444 --stacktrace
 
       - name: Load Allure history
         uses: actions/checkout@v4
