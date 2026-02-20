@@ -1,3 +1,4 @@
+
 name: UI Testing Execution
 
 on:
@@ -59,9 +60,8 @@ jobs:
 
           chmod +x "$GRADLE_PATH"
           
-          # Ejecución de tests con Page Object Model y Page Factory
-          # Pasamos la URL del Grid y el modo Headless como System Properties
-          "$GRADLE_PATH" test -DgridUrl=http://127.0.0.1:4444 -DCHROME_HEADLESS=true --info
+          # IMPORTANTE: Usamos /wd/hub para conectar con el Grid
+          "$GRADLE_PATH" test -DgridUrl=http://127.0.0.1:4444/wd/hub -DCHROME_HEADLESS=true --info
 
       - name: Load Allure history
         uses: actions/checkout@v4
@@ -69,4 +69,22 @@ jobs:
         continue-on-error: true
         with:
           ref: gh-pages
-          path: gh
+          path: gh-pages
+
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+          publish_branch: gh-pages
