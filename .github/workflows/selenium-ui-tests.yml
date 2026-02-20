@@ -13,7 +13,6 @@ jobs:
       contents: write
 
     services:
-      # Contenedor de Chrome con recursos optimizados para evitar Timeouts
       selenium-grid:
         image: selenium/standalone-chrome:latest
         ports:
@@ -45,23 +44,21 @@ jobs:
         env:
           CHROME_HEADLESS: "true"
         run: |
-          # 1. Espera activa para asegurar que el Grid responda
           echo "Esperando a que Selenium Grid esté listo..."
+          # Espera activa mejorada
           timeout 60s bash -c 'until curl -s http://localhost:4444/status | grep -q "\"ready\": true"; do sleep 2; done'
           echo "¡Grid listo para la acción!"
 
-          # 2. Localizar gradlew dinámicamente y ejecutar
+          # Localizar gradlew y ejecutar con la IP directa 127.0.0.1
           GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
-
+          
           if [ -z "$GRADLE_PATH" ]; then
-            echo "ERROR: No se encontró el archivo gradlew. Verifica si está en el repositorio."
-            ls -R
+            echo "ERROR: No se encontró gradlew."
             exit 1
           else
-            echo "Se encontró gradlew en: $GRADLE_PATH"
             chmod +x "$GRADLE_PATH"
-            cd $(dirname "$GRADLE_PATH")
-            ./gradlew test -DgridUrl=http://localhost:4444 -DCHROME_HEADLESS=true --info
+            # USAMOS 127.0.0.1 para evitar problemas de resolución de localhost en Ubuntu
+            "$GRADLE_PATH" test -DgridUrl=http://127.0.0.1:4444 -DCHROME_HEADLESS=true --info
           fi
 
       - name: Load Allure history
