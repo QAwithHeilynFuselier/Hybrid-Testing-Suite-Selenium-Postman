@@ -50,18 +50,6 @@ public class HomePage  extends BasePage {
         PageFactory.initElements(givenDriver, this);
     }
 
-    public boolean isAvatarVisible2() {
-        return findElement(userAvatarIcon).isDisplayed();
-    }
-    public void clickAvatar() {
-        wait.until(ExpectedConditions.elementToBeClickable(userAvatarIcon)).click();
-
-    }
-    public boolean isProfileVisible2() {
-        return profileName.isDisplayed();
-    }
-
-
     public void clickLogout() {
         wait.until(ExpectedConditions.elementToBeClickable(logoutButton));
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -70,9 +58,7 @@ public class HomePage  extends BasePage {
     }
 
 
-    public WebElement getLoginButton2() {
-        return loginButton;
-    }
+
 
     public boolean isLogoutButtonVisible() {
         return logoutButton.isDisplayed();
@@ -150,20 +136,6 @@ public class HomePage  extends BasePage {
     }
 
 
-
-    public boolean isSuccessToastDisplayed1() {
-        try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(
-                    ExpectedConditions.presenceOfElementLocated(
-                            By.cssSelector("div.success")
-                    )
-            );
-            return true;
-        } catch (TimeoutException e) {
-            return false;
-        }
-    }
     public boolean isSuccessToastDisplayed() {
         try {
 
@@ -187,7 +159,13 @@ public class HomePage  extends BasePage {
     { return loginButton;
     }
 
+    public void clickAvatar() {
 
+        WebElement avatar = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("img.avatar")));
+
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", avatar);
+    }
 
 
 

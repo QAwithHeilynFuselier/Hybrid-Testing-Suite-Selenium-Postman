@@ -159,6 +159,7 @@ public class LoginTests extends BaseTest {
 
             loginPage.login("heilyn.fuselier@testpro.io", "NewYear@2026");
             homePage.clickAvatar();
+            takeScreenshot("After_Clicking_Avatar");
             homePage.updateProfileInfo(name, email);
             homePage.updatePassword("NewYear@2026", "NewYear@2026");
             takeScreenshot("updateprofile");
